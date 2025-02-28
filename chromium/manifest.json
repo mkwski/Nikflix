@@ -1,0 +1,17 @@
+{
+  "name": "Nikflix",
+  "description": "En:Extension to Get Around the Netflix Password-Sharing Ban. fr:Extension pour contourner l'interdiction du partage de mot de passe Netflix. ",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_icon": "icons/Nikflix-48.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["Main.js"],
+      "matches": [
+        "*://*.netflix.com/*"
+      ]
+    }
+  ]
+}
