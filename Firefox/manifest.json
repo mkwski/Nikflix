@@ -5,7 +5,7 @@
 
   "description": "En:Extension to Get Around the Netflix Password-Sharing Ban. fr:Extension pour contourner l'interdiction du partage de mot de passe Netflix.",
   "icons": {
-    "48": "icons/Nikflix-48.ico"
+    "48": "icons/Nikflix-48.png"
   },
 
   "content_scripts": [

@@ -138,7 +138,7 @@ function addMediaController () {
     document.getElementById("appMountPoint").appendChild(style);
     buttonPlayPause = document.createElement('button');
     buttonPlayPause.id = 'netflix-play-pause';
-    buttonPlayPause.innerHTML = videoElement.paused ? '▶' : '⏸';
+    buttonPlayPause.textContent = videoElement.paused ? '▶' : '⏸';
 
 
     buttonFullScreen = document.createElement('button');
@@ -172,7 +172,7 @@ function addMediaController () {
 
     document.addEventListener('fullscreenchange', () => {
         if (buttonFullScreen) {
-            buttonFullScreen.innerHTML = document.fullscreenElement ? '⤓' : '⤢';
+            buttonFullScreen.textContent = document.fullscreenElement ? '⤓' : '⤢';
         }
     });
 
