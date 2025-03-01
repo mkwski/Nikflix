@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
@@ -74,15 +74,15 @@ jobs:
         cd dist/chromium
         zip -r ../chromium-extension.zip *
     
-    # Téléchargement des extensions comme artéfacts
+    # Téléchargement des extensions comme artéfacts - Utilisation de la v4
     - name: Upload Chrome Extension
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: chromium-extension
         path: dist/chromium-extension.zip
     
     - name: Upload Firefox Extension
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: firefox-extension
         path: dist/firefox-extension.zip
