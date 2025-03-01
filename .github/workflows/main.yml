@@ -2,10 +2,8 @@ name: Build and Package Browser Extensions
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    # Activé pour tous les pushes, sur toutes les branches
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -88,21 +86,3 @@ jobs:
       with:
         name: firefox-extension
         path: dist/firefox-extension.zip
-    
-    # Facultatif: Publier sur le Chrome Web Store
-    - name: Publish to Chrome Web Store
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        # Commenté car nécessite des secrets configurés
-        # npm install -g chrome-webstore-upload-cli
-        # chrome-webstore-upload upload --source dist/chromium-extension.zip --extension-id YOUR_EXTENSION_ID --client-id ${{ secrets.CHROME_CLIENT_ID }} --client-secret ${{ secrets.CHROME_CLIENT_SECRET }} --refresh-token ${{ secrets.CHROME_REFRESH_TOKEN }}
-      shell: bash
-    
-    # Facultatif: Publier sur Mozilla Add-ons
-    - name: Publish to Mozilla Add-ons
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        # Commenté car nécessite des secrets configurés
-        # npm install -g web-ext
-        # web-ext sign --source-dir dist/firefox --api-key ${{ secrets.MOZILLA_API_KEY }} --api-secret ${{ secrets.MOZILLA_API_SECRET }}
-      shell: bash
