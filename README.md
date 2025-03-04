@@ -2,6 +2,11 @@
 
 An extension that allows bypassing Netflix's password-sharing restrictions.
 
+## Installation on Firefox Browser
+
+[![Download on Firefox](https://img.shields.io/badge/Download-Firefox-orange?logo=firefox)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
+
+
 ## Installation on Chromium Browsers (Developer Mode)
 
 ### Prerequisites

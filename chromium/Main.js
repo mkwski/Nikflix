@@ -9,6 +9,7 @@ let state = {
     progressionBar: null,
     screenTime: null,
     videoElement: null,
+    volumeSlider:null,
     lastScreenTime: -1,
     lastTotalTime: -1,
     isControllerAdded: false
@@ -92,56 +93,101 @@ function createStylesIfNeeded() {
         const style = document.createElement('style');
         style.id = 'netflix-controller-styles';
         style.textContent = `
-      #mon-controleur-netflix {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 10px;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-        transform: translateZ(0); 
-        will-change: transform; 
-        pointer-events: auto;
-      }
-      #netflix-play-pause, #netflix-plein-ecran {
-        background-color: #e50914;
-        border: none;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 4px;
-        margin-right: 10px;
-        cursor: pointer;
-        font-size: 16px;
-        min-width: 40px;
-        text-align: center;
-      }
-      #netflix-barre-container {
-        flex: 1;
-        height: 10px;
-        background-color: #333;
-        border-radius: 5px;
-        overflow: hidden;
-        cursor: pointer;
-      }
-      #netflix-barre-progression {
-        height: 100%;
-        background-color: #e50914;
-        width: 0%;
-        will-change: width; 
-        transform: translateZ(0); 
-      }
-      #netflix-temps {
-        margin-left: 10px;
-        width: 120px;
-        font:bold;
-        text-align: center;
-      }
+   #mon-controleur-netflix {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+    transform: translateZ(0); 
+    will-change: transform; 
+    pointer-events: auto;
+}
+
+#netflix-play-pause, 
+#netflix-plein-ecran {
+    background-color: #e50914;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    min-width: 40px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+#netflix-play-pause:hover, 
+#netflix-plein-ecran:hover {
+    background-color: #f6121d;
+}
+
+#netflix-barre-container {
+    flex: 1;
+    height: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    margin: 0 15px;
+}
+
+#netflix-barre-progression {
+    height: 100%;
+    background-color: #e50914;
+    width: 0%;
+    will-change: width; 
+    transform: translateZ(0); 
+}
+
+#netflix-temps {
+    margin-left: 10px;
+    width: auto; 
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    min-width: 70px;
+}
+
+#netflix-volume-container {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+#netflix-volume-icon {
+    margin-right: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#netflix-volume-icon:hover {
+    transform: scale(1.1);
+}
+
+#netflix-volume-slider {
+    width: 100px;
+    height: 5px;
+    background-color: #333;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+#netflix-volume-slider:hover {
+    opacity: 1;
+    background-color: #444;
+}
     `;
         document.getElementById("appMountPoint").appendChild(style);
     }
@@ -166,6 +212,7 @@ function cleanController() {
         progressionBar: null,
         screenTime: null,
         videoElement: null,
+        volumeSlider: null,
         isControllerAdded: false
     };
 }
@@ -210,6 +257,21 @@ function addMediaController() {
     state.screenTime = document.createElement('div');
     state.screenTime.id = 'netflix-temps';
 
+    //volume controle
+    const volumeContainer = document.createElement('div');
+    volumeContainer.id = 'netflix-volume-container';
+
+    const volumeIcon = document.createElement('span');
+    volumeIcon.id = 'netflix-volume-icon';
+    volumeIcon.textContent = '🔊';
+
+    state.volumeSlider = document.createElement('input');
+    state.volumeSlider.type = 'range';
+    state.volumeSlider.id = 'netflix-volume-slider';
+    state.volumeSlider.min = '0';
+    state.volumeSlider.max = '100';
+    state.volumeSlider.value = state.videoElement.volume * 100;
+
 
     const handleControlsClick = (e) => {
         if (e.target === state.buttonPlayPause) {
@@ -222,18 +284,25 @@ function addMediaController() {
             }
         } else if (e.target === state.buttonFullScreen) {
             toggleFullScreen();
+        } else if (e.target === volumeIcon) {
+            state.videoElement.muted = !state.videoElement.muted;
+            volumeIcon.textContent = state.videoElement.muted ? '🔇' : '🔊';
         }
     };
 
-    state.controllerElement.addEventListener('click', handleControlsClick);
+    state.volumeSlider.addEventListener('input', (e) => {
+        const volume = e.target.value / 100;
+        state.videoElement.volume = volume;
+        volumeIcon.textContent = volume === 0 ? '🔇' : '🔊';
+    });
 
+    state.controllerElement.addEventListener('click', handleControlsClick);
 
     document.addEventListener('fullscreenchange', () => {
         if (state.buttonFullScreen) {
             state.buttonFullScreen.textContent = document.fullscreenElement ? '⤓' : '⤢';
         }
     });
-
 
     state.videoElement.addEventListener('play', () => {
         if (state.buttonPlayPause) state.buttonPlayPause.innerHTML = '⏸';
@@ -243,11 +312,16 @@ function addMediaController() {
         if (state.buttonPlayPause) state.buttonPlayPause.innerHTML = '▶';
     });
 
+
+    volumeContainer.appendChild(volumeIcon);
+    volumeContainer.appendChild(state.volumeSlider);
+
     barreContainer.appendChild(state.progressionBar);
     state.controllerElement.appendChild(state.buttonPlayPause);
     state.controllerElement.appendChild(state.buttonFullScreen);
     state.controllerElement.appendChild(barreContainer);
     state.controllerElement.appendChild(state.screenTime);
+    state.controllerElement.appendChild(volumeContainer);
 
     document.body.appendChild(state.controllerElement);
     state.isControllerAdded = true;
