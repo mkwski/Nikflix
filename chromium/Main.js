@@ -12,7 +12,9 @@ let state = {
     volumeSlider:null,
     lastScreenTime: -1,
     lastTotalTime: -1,
-    isControllerAdded: false
+    isControllerAdded: false,
+    mutationTimeout: null,
+    controllerTimerId: null
 };
 
 
@@ -343,13 +345,11 @@ function removeElementsByClasses(classesNames) {
     const elementsToRemove = [];
 
     classesNames.forEach(className => {
-        document.querySelectorAll(`[class*="${className}"]`).forEach(el => {
-            elementsToRemove.push(el);
-        });
+        const elementsToRemove = document.querySelectorAll(`[class*="${className}"]`);
+        if (elementsToRemove.length > 0) {
+            elementsToRemove.forEach(el => el.remove());
+        }
     });
-
-
-    elementsToRemove.forEach(el => el.remove());
 }
 
 
@@ -378,21 +378,23 @@ const observerOptions = {
     subtree: true
 };
 
-let mutationTimeout = null;
 const observer = new MutationObserver((mutations) => {
+    if (state.mutationTimeout) clearTimeout(state.mutationTimeout);
 
-    if (mutationTimeout) clearTimeout(mutationTimeout);
-
-    mutationTimeout = setTimeout(() => {
-
+    state.mutationTimeout = setTimeout(() => {
         const hasRelevantChanges = mutations.some(mutation => {
             return Array.from(mutation.addedNodes).some(node => {
                 if (node.nodeName === 'VIDEO') return true;
 
                 // Check if relevant to our controller
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    // More robust class checking
+                    const nodeClassName = node.className || '';
                     return node.querySelector('video') ||
-                        CLASSES_TO_REMOVE.some(c => node.className && node.className.includes(c));
+                        CLASSES_TO_REMOVE.some(c =>
+                            typeof nodeClassName === 'string' &&
+                            nodeClassName.includes(c)
+                        );
                 }
                 return false;
             });
