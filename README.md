@@ -1,6 +1,7 @@
 # Netflix Password-Sharing Bypass Extension
 
 An extension that allows bypassing Netflix's password-sharing restrictions.
+If you like this project, consider giving it a star ⭐
 
 ## Installation on Firefox Browser
 
@@ -53,5 +54,10 @@ Using this extension may violate Netflix's terms of service. Use it at your own 
 
 **Contribute**
 If you would like to improve the extension, feel free to submit a Pull Request or report an issue in the GitHub repository's Issues section.
+
+## Contributors
+👤 **@bhhoang**  
+📌 [GitHub Profile](https://github.com/bhhoang)
+
 
 **License** MIT License
