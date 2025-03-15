@@ -1344,7 +1344,7 @@ function updateSubtitleStyles() {
 
     // Set size variables
     let sizeValue;
-    switch(state.subtitleSize) {
+    switch (state.subtitleSize) {
         case 'small': sizeValue = 'var(--small-subtitle-size)'; break;
         case 'large': sizeValue = 'var(--large-subtitle-size)'; break;
         default: sizeValue = 'var(--medium-subtitle-size)';
@@ -1386,7 +1386,7 @@ function setupKeyboardShortcuts() {
     }
 
     // Create the keyboard listener function
-    state.keyboardListener = function(e) {
+    state.keyboardListener = function (e) {
         // Only handle events if we're on a Netflix watch page
         if (!isOnNetflixWatch()) return;
 
@@ -1402,9 +1402,11 @@ function setupKeyboardShortcuts() {
             showController();
         }
 
-        switch(e.key) {
+        // Handle all other keys normally
+        switch (e.key) {
             case ' ': // Spacebar - toggle play/pause
                 e.preventDefault(); // Prevent page scrolling
+
                 if (videoElement.paused) {
                     videoElement.play();
                     if (state.buttonPlayPause) {
@@ -1417,7 +1419,17 @@ function setupKeyboardShortcuts() {
                     }
                 }
                 break;
+            case 'ArrowLeft': // Left arrow - seek backward
+                e.preventDefault(); // Prevent default browser scrolling
+                e.stopPropagation(); // Stop event from being handled elsewhere
+                sendSeekKeyToNetflix('left'); // Send the key to Netflix player
+                break;
 
+            case 'ArrowRight': // Right arrow - seek forward
+                e.preventDefault(); // Prevent default browser scrolling
+                e.stopPropagation(); // Stop event from being handled elsewhere
+                sendSeekKeyToNetflix('right'); // Send the key to Netflix player
+                break;
             case 'ArrowUp': // Up arrow - volume up
                 e.preventDefault();
                 videoElement.volume = Math.min(1, videoElement.volume + 0.1);
@@ -1438,6 +1450,7 @@ function setupKeyboardShortcuts() {
 
             case 'm': // M - toggle mute
             case 'M':
+                e.preventDefault();
                 videoElement.muted = !videoElement.muted;
                 const volumeIcon = document.getElementById('netflix-volume-icon');
                 if (volumeIcon) {
@@ -1448,14 +1461,17 @@ function setupKeyboardShortcuts() {
                 showMessage(videoElement.muted ? 'Muted' : 'Unmuted');
                 break;
 
-            case 'f': // F - toggle fullscreen
+            case 'f':
             case 'F':
+                e.preventDefault();
+                e.stopPropagation();
                 toggleFullScreen();
                 showMessage(document.fullscreenElement ? 'Fullscreen Mode' : 'Exit Fullscreen');
                 break;
 
             case 'c': // C - toggle subtitles
             case 'C':
+                e.preventDefault();
                 state.subtitleEnabled = !state.subtitleEnabled;
                 toggleSubtitles(state.subtitleEnabled);
                 showMessage(state.subtitleEnabled ? 'Subtitles On' : 'Subtitles Off');
@@ -1468,6 +1484,8 @@ function setupKeyboardShortcuts() {
 
             case 'b': // B - toggle bilingual subtitles
             case 'B':
+                e.preventDefault();
+                e.stopPropagation();
                 state.bilingualEnabled = !state.bilingualEnabled;
 
                 if (state.bilingualEnabled) {
@@ -1492,13 +1510,276 @@ function setupKeyboardShortcuts() {
                 }
                 break;
 
-            // For arrow keys, we'll let Netflix handle them natively
-            // by not preventing default or trying to manipulate the video directly
+            // Add other shortcuts as needed
         }
     };
 
-    // Add the keyboard listener to the document
+    // Add the keyboard listener - DO NOT USE CAPTURE MODE for Arrow keys to work properly
     document.addEventListener('keydown', state.keyboardListener);
+
+    // Set up key handler specifically for NetFlix's video element to monitor seeking progress
+    const netflixSeekMonitor = (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            // Update our progress bar to match Netflix's seeking
+            requestAnimationFrame(updateProgression);
+        }
+    };
+
+    // Add this directly to the video element
+    const videoElement = document.querySelector('video');
+    if (videoElement) {
+        videoElement.addEventListener('keydown', netflixSeekMonitor);
+
+        // Also monitor seeking events
+        videoElement.addEventListener('seeking', () => {
+            requestAnimationFrame(updateProgression);
+        });
+
+        // And timeupdate events
+        videoElement.addEventListener('timeupdate', () => {
+            requestAnimationFrame(updateProgression);
+        });
+    }
+}
+
+function createSeekControls() {
+    // Only add seek controls if they don't exist yet
+    if (document.getElementById('netflix-seek-controls')) return;
+
+    const seekControls = document.createElement('div');
+    seekControls.id = 'netflix-seek-controls';
+    seekControls.style.position = 'fixed';
+    seekControls.style.bottom = '100px';
+    seekControls.style.left = '50%';
+    seekControls.style.transform = 'translateX(-50%)';
+    seekControls.style.display = 'flex';
+    seekControls.style.alignItems = 'center';
+    seekControls.style.gap = '10px';
+    seekControls.style.zIndex = '10001';
+    seekControls.style.opacity = '0';
+    seekControls.style.transition = 'opacity 0.3s ease';
+
+    // Rewind button
+    const rewindBtn = document.createElement('button');
+    rewindBtn.textContent = '-10s';
+    rewindBtn.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    rewindBtn.style.color = 'white';
+    rewindBtn.style.border = 'none';
+    rewindBtn.style.borderRadius = '4px';
+    rewindBtn.style.padding = '8px 12px';
+    rewindBtn.style.cursor = 'pointer';
+
+    // Forward button
+    const forwardBtn = document.createElement('button');
+    forwardBtn.textContent = '+10s';
+    forwardBtn.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    forwardBtn.style.color = 'white';
+    forwardBtn.style.border = 'none';
+    forwardBtn.style.borderRadius = '4px';
+    forwardBtn.style.padding = '8px 12px';
+    forwardBtn.style.cursor = 'pointer';
+
+    // Add events
+    rewindBtn.addEventListener('click', () => {
+        // Simulate left arrow key press on Netflix player
+        const video = document.querySelector('video');
+        if (video) {
+            const event = new KeyboardEvent('keydown', {
+                key: 'ArrowLeft',
+                code: 'ArrowLeft',
+                keyCode: 37,
+                which: 37,
+                bubbles: true
+            });
+            video.dispatchEvent(event);
+        }
+    });
+
+    forwardBtn.addEventListener('click', () => {
+        // Simulate right arrow key press on Netflix player
+        const video = document.querySelector('video');
+        if (video) {
+            const event = new KeyboardEvent('keydown', {
+                key: 'ArrowRight',
+                code: 'ArrowRight',
+                keyCode: 39,
+                which: 39,
+                bubbles: true
+            });
+            video.dispatchEvent(event);
+        }
+    });
+
+    seekControls.appendChild(rewindBtn);
+    seekControls.appendChild(forwardBtn);
+
+    document.body.appendChild(seekControls);
+
+    // Show seek controls when controller is visible
+    const showSeekControls = () => {
+        if (state.isControllerVisible) {
+            seekControls.style.opacity = '1';
+        } else {
+            seekControls.style.opacity = '0';
+        }
+    };
+
+    // Connect to controller visibility
+    const controllerObserver = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            if (mutation.attributeName === 'class') {
+                showSeekControls();
+            }
+        });
+    });
+
+    if (state.controllerElement) {
+        controllerObserver.observe(state.controllerElement, { attributes: true });
+    }
+
+    return seekControls;
+}
+
+/**
+ * Add to addMediaController function to include seek controls
+ */
+function setupSeekingSupport() {
+    // Create on-screen seek controls
+    createSeekControls();
+
+    // Also make sure our progress bar is always synced with Netflix's playback
+    const videoElement = document.querySelector('video');
+    if (videoElement) {
+        videoElement.addEventListener('timeupdate', () => {
+            requestAnimationFrame(updateProgression);
+        });
+
+        videoElement.addEventListener('seeking', () => {
+            requestAnimationFrame(updateProgression);
+        });
+
+        videoElement.addEventListener('seeked', () => {
+            requestAnimationFrame(updateProgression);
+        });
+    }
+}
+
+
+/**
+ * Find the Netflix player element and send keyboard events to it
+ * @param {string} direction - 'left' or 'right'
+ */
+function sendSeekKeyToNetflix(direction) {
+    // Find the Netflix player - using the class and data attribute you identified
+    const netflixPlayer = document.querySelector('div[data-uia="player"]');
+
+    if (!netflixPlayer) {
+        console.error('Netflix player element not found');
+        return;
+    }
+
+    // Store current active element to restore focus later
+    const previouslyFocused = document.activeElement;
+
+    // Focus the Netflix player element
+    netflixPlayer.focus();
+
+    // Short delay to ensure focus is established
+    setTimeout(() => {
+        // Create a keyboard event
+        const keyEvent = new KeyboardEvent('keydown', {
+            key: direction === 'left' ? 'ArrowLeft' : 'ArrowRight',
+            code: direction === 'left' ? 'ArrowLeft' : 'ArrowRight',
+            keyCode: direction === 'left' ? 37 : 39,
+            which: direction === 'left' ? 37 : 39,
+            bubbles: true,
+            cancelable: true,
+            view: window
+        });
+
+        // Dispatch the event to the Netflix player
+        netflixPlayer.dispatchEvent(keyEvent);
+
+        // Show a message to indicate the action
+        showMessage(direction === 'left' ? 'Rewind' : 'Fast Forward');
+
+        // Restore previous focus after a short delay
+        setTimeout(() => {
+            if (previouslyFocused && document.contains(previouslyFocused)) {
+                previouslyFocused.focus();
+            }
+        }, 100);
+    }, 50);
+}
+
+/**
+ * Add video overlay with additional properties to help with focus management
+ */
+function createVideoOverlay() {
+    // Create video overlay that allows clicks to pass through to Netflix controls
+    state.videoOverlay = document.createElement('div');
+    state.videoOverlay.id = 'netflix-video-overlay';
+    state.videoOverlay.style.pointerEvents = 'none'; // Allow clicks to pass through to Netflix's controls
+
+    // Make overlay focusable but visually unchanged
+    state.videoOverlay.tabIndex = -1; // Make focusable without being in tab order
+    state.videoOverlay.style.outline = 'none'; // Remove focus outline
+
+    // Ensure our overlay can intercept keyboard events
+    state.videoOverlay.addEventListener('keydown', (e) => {
+        // Pass the event to our global keyboard handler
+        if (state.keyboardListener) {
+            state.keyboardListener(e);
+        }
+    });
+
+    document.body.appendChild(state.videoOverlay);
+}
+
+function createVideoAreaOverlay() {
+    const videoAreaOverlay = document.createElement('div');
+    videoAreaOverlay.id = 'netflix-video-area-overlay';
+    videoAreaOverlay.style.position = 'fixed';
+    videoAreaOverlay.style.top = '0';
+    videoAreaOverlay.style.left = '0';
+    videoAreaOverlay.style.width = '100%';
+    videoAreaOverlay.style.height = 'calc(100% - 140px)';
+    videoAreaOverlay.style.zIndex = '9997';
+    videoAreaOverlay.style.cursor = 'pointer';
+    videoAreaOverlay.style.backgroundColor = 'transparent';
+
+    // Make it focusable
+    videoAreaOverlay.tabIndex = -1;
+    videoAreaOverlay.style.outline = 'none';
+
+    // Handle play/pause toggle
+    videoAreaOverlay.addEventListener('click', (e) => {
+        // Prevent clicks on controller from triggering this
+        if (!e.target.closest('#mon-controleur-netflix') && !e.target.closest('#netflix-subtitle-settings')) {
+            if (state.videoElement.paused) {
+                state.videoElement.play();
+                if (state.buttonPlayPause) {
+                    state.buttonPlayPause.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+                }
+            } else {
+                state.videoElement.pause();
+                if (state.buttonPlayPause) {
+                    state.buttonPlayPause.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+                }
+            }
+        }
+    });
+
+    // Handle double-click for fullscreen
+    videoAreaOverlay.addEventListener('dblclick', (e) => {
+        // Prevent double-click on controller
+        if (!e.target.closest('#mon-controleur-netflix') && !e.target.closest('#netflix-subtitle-settings')) {
+            toggleFullScreen();
+        }
+    });
+
+    document.body.appendChild(videoAreaOverlay);
+    return videoAreaOverlay;
 }
 
 /**
@@ -1514,13 +1795,25 @@ function addMediaController() {
 
     createStylesIfNeeded();
 
+    // Create enhanced video overlays for better focus management
+    createVideoOverlay();
+    const videoAreaOverlay = createVideoAreaOverlay();
+
+    // Create controller element as before
+    state.controllerElement = document.createElement('div');
+    state.controllerElement.id = CONTROLLER_ID;
+
+    // Make controller focusable too
+    state.controllerElement.tabIndex = -1;
+    state.controllerElement.style.outline = 'none';
+
+
     // Create video overlay that allows clicks to pass through to Netflix controls
     state.videoOverlay = document.createElement('div');
     state.videoOverlay.id = 'netflix-video-overlay';
     state.videoOverlay.style.pointerEvents = 'none'; // Allow clicks to pass through to Netflix's controls
 
     // Create a separate overlay just for the video area (excluding controls)
-    const videoAreaOverlay = document.createElement('div');
     videoAreaOverlay.id = 'netflix-video-area-overlay';
     videoAreaOverlay.style.position = 'fixed';
     videoAreaOverlay.style.top = '0';
@@ -1591,6 +1884,7 @@ function addMediaController() {
     state.volumeSlider.max = '100';
     state.volumeSlider.value = state.videoElement.volume * 100;
 
+
     const handleControlsClick = (e) => {
         if (e.target === state.buttonPlayPause || e.target.closest('#netflix-play-pause')) {
             if (state.videoElement.paused) {
@@ -1647,17 +1941,6 @@ function addMediaController() {
             '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
     });
 
-    // Add click handler directly to the progress bar for seeking
-    barreContainer.addEventListener('click', (e) => {
-        const rect = barreContainer.getBoundingClientRect();
-        const position = (e.clientX - rect.left) / rect.width;
-
-        if (state.videoElement && position >= 0 && position <= 1) {
-            // Simple direct approach matching the original implementation
-            state.videoElement.currentTime = position * state.videoElement.duration;
-        }
-    });
-
     state.controllerElement.addEventListener('click', handleControlsClick);
 
     document.addEventListener('fullscreenchange', () => {
@@ -1680,6 +1963,41 @@ function addMediaController() {
             state.isControllerVisible = true;
         }
     });
+
+    setupKeyboardShortcuts();
+
+    setTimeout(() => {
+        if (videoAreaOverlay) {
+            videoAreaOverlay.focus();
+        }
+    }, 500);
+
+    // Prevent Netflix from stealing focus
+    document.addEventListener('focusin', (e) => {
+        if (state.isControllerAdded &&
+            !e.target.closest('#mon-controleur-netflix') &&
+            !e.target.closest('#netflix-subtitle-settings') &&
+            e.target.tagName !== 'INPUT' &&
+            e.target.tagName !== 'TEXTAREA' &&
+            state.videoOverlay) {
+
+            // Wait to avoid focus fighting and only if not user-initiated
+            if (!state.userInitiatedFocus) {
+                setTimeout(() => {
+                    state.videoOverlay.focus();
+                }, 10);
+            }
+        }
+    });
+
+    // Track user-initiated focus
+    document.addEventListener('mousedown', () => {
+        state.userInitiatedFocus = true;
+        setTimeout(() => {
+            state.userInitiatedFocus = false;
+        }, 100);
+    });
+
 
     // Auto-hide controller after inactivity
     state.videoElement.addEventListener('mousemove', () => {
@@ -1705,7 +2023,6 @@ function addMediaController() {
     });
 
     // Set up keyboard shortcuts
-    setupKeyboardShortcuts();
 
     volumeSliderContainer.appendChild(state.volumeSlider);
     volumeContainer.appendChild(volumeIcon);
@@ -1839,21 +2156,16 @@ const observer = new MutationObserver((mutations) => {
     }, 100); // Debounce time
 });
 
-// Initialize on page load
 if (document.readyState === 'loading') {
     document.addEventListener("DOMContentLoaded", () => {
-        // Set up global keyboard shortcuts immediately
         setupKeyboardShortcuts();
 
-        // Start observing for video player changes
         observer.observe(document.body, observerOptions);
         doYourJob();
     });
 } else {
-    // Set up global keyboard shortcuts immediately
     setupKeyboardShortcuts();
 
-    // Start observing for video player changes
     observer.observe(document.body, observerOptions);
     doYourJob();
 }
