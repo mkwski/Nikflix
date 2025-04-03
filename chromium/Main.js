@@ -22,6 +22,7 @@ let state = {
     messageOverlay: null,
     messageTimer: null,
     seekAmount: 10, // seconds to seek with arrow keys
+    seekTime: null,
 
     // Subtitle-related state
     subtitleEnabled: true,
@@ -33,8 +34,8 @@ let state = {
     subtitleContainer: null,
     subtitleSettingsOpen: false,
     subtitleSettingsPanel: null,
-    primaryLanguage: "en", // Default primary language
-    secondaryLanguage: "es", // Default secondary language
+    primaryLanguage: "id", // Default primary language
+    secondaryLanguage: "en", // Default secondary language
     subtitlePosition: "bottom", // Can be "bottom" or "top"
     subtitleSize: "medium", // Can be "small", "medium", "large"
     primaryColor: "white",
@@ -68,7 +69,8 @@ const LANGUAGE_NAMES = {
     "ko": "Korean",
     "ar": "Arabic",
     "hi": "Hindi",
-    "tr": "Turkish"
+    "tr": "Turkish",
+    "id": "Indonesian",
     // Add more languages as needed
 };
 
@@ -577,7 +579,6 @@ input:checked + .subtitle-toggle-slider:before {
     white-space: normal !important; /* Allow text to wrap */
     overflow-wrap: break-word !important; /* Break long words if needed */
     word-break: break-word !important; /* Break words at appropriate points */
-    display: inline-block !important; /* Keep the text behavior consistent */
     max-width: 100% !important; /* Prevent overflow */
 }
 
@@ -911,7 +912,8 @@ function extractLanguageCode(name) {
         'korean': 'ko', '한국어': 'ko',
         'arabic': 'ar', 'العربية': 'ar',
         'hindi': 'hi', 'हिन्दी': 'hi',
-        'turkish': 'tr', 'türkçe': 'tr'
+        'turkish': 'tr', 'türkçe': 'tr',
+        'indonesian': 'id', 'bahasa indonesia': 'id',
     };
 
     for (const [langName, code] of Object.entries(langMap)) {
@@ -1859,6 +1861,60 @@ function addMediaController() {
 
     const barreContainer = document.createElement('div');
     barreContainer.id = 'netflix-barre-container';
+
+
+    barreContainer.addEventListener('mousemove', (event) => {
+        const rect = barreContainer.getBoundingClientRect();
+        const percentage = (event.clientX - rect.left) / rect.width;
+        const videoDuration = state.videoElement.duration;
+        const hoverTime = Math.round(videoDuration * percentage * 1000); // Convert to milliseconds
+      
+        state.seekTime = hoverTime
+        console.log(hoverTime); // Log raw time in milliseconds
+
+      
+        let tooltip = document.getElementById('progress-bar-tooltip');
+        if (!tooltip) {
+          tooltip = document.createElement('div');
+          tooltip.id = 'progress-bar-tooltip';
+          tooltip.style.position = 'fixed';
+          tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+          tooltip.style.color = 'white';
+          tooltip.style.padding = '5px 10px';
+          tooltip.style.borderRadius = '4px';
+          tooltip.style.fontSize = '12px';
+          tooltip.style.pointerEvents = 'none';
+          tooltip.style.transform = 'translate(-50%, -10px)';
+          tooltip.style.whiteSpace = 'nowrap';
+          tooltip.style.zIndex = '10000';
+          document.body.appendChild(tooltip);
+        }
+        tooltip.textContent = timeFormat(hoverTime / 1000);
+        tooltip.style.left = `${event.clientX}px`;
+        tooltip.style.top = `${rect.top - 20}px`;
+      
+      });
+      
+      barreContainer.addEventListener('click', () => {
+        const script = document.createElement('script');
+        script.src = chrome.runtime.getURL(`inject.js?seekTime=${state.seekTime}`);
+        script.onload = function () {
+          this.remove(); // Remove after execution
+        };
+        (document.head || document.documentElement).appendChild(script);
+        showMessage(`Seeking to ${timeFormat(state.seekTime / 1000)}`);  });
+      
+      
+      
+      
+      
+    barreContainer.addEventListener('mouseleave', () => {
+        const tooltip = document.getElementById('progress-bar-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    });
+
 
     state.progressionBar = document.createElement('div');
     state.progressionBar.id = 'netflix-barre-progression';
