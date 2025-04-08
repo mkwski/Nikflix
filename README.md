@@ -56,8 +56,12 @@ Using this extension may violate Netflix's terms of service. Use it at your own 
 If you would like to improve the extension, feel free to submit a Pull Request or report an issue in the GitHub repository's Issues section.
 
 ## Contributors
-👤 **@bhhoang**  
+ - 👤 **@bhhoang**  
 📌 [GitHub Profile](https://github.com/bhhoang)
+- 👤 **@myanpetra99**
+- 📌 [GitHub Profile](https://github.com/myanpetra99)
+- 👤 **@IshaanM8**
+- 📌 [GitHub Profile](https://github.com/IshaanM8)
 
 
 **License** MIT License
