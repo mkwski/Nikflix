@@ -6,6 +6,12 @@
   "action": {
     "default_icon": "icons/Nikflix-48.png"
   },
+  "web_accessible_resources": [
+    {
+        "resources": ["netflix-seeker.js"],
+        "matches": ["*://*.netflix.com/*"]
+    }
+  ],
   "content_scripts": [
     {
       "js": ["Main.js"],
