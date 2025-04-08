@@ -72,6 +72,17 @@ const LANGUAGE_NAMES = {
     // Add more languages as needed
 };
 
+// script injecter to seek using progress bar
+function injectScript(fileName) {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL(fileName);
+    script.onload = () => script.remove();
+    (document.head || document.documentElement).appendChild(script);
+}
+  
+// Inject the script
+injectScript('netflix-seeker.js');
+
 /**
  * Check if the current URL is a Netflix watch URL
  * @returns {boolean} True if on Netflix watch page
@@ -2064,6 +2075,19 @@ function addMediaController() {
         }
     };
     state.progressionIntervalId = requestAnimationFrame(rafCallback);
+
+    // Set up Event listener to allow seeking using progress bar
+    barreContainer.addEventListener('click', (e) => {
+        const rect = barreContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = (x / rect.width) * 100; // allows us to determine where user wants to seek to
+      
+        const totalVideoTime = Math.floor(state.videoElement.duration); // seconds
+        const seekTime = Math.floor((percent / 100) * totalVideoTime * 1000); // ms
+      
+        // Send to injected script for custom seeking
+        window.dispatchEvent(new CustomEvent('netflixSeekTo', { detail: seekTime }));
+    });
 
     // Initial auto-hide if video is playing
     if (!state.videoElement.paused) {
