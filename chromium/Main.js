@@ -782,6 +782,12 @@ function showController() {
 
     state.controllerElement.classList.remove("hidden");
     state.isControllerVisible = true;
+    
+    // Show cursor when controls are visible
+    const videoAreaOverlay = document.getElementById("netflix-video-area-overlay");
+    if (videoAreaOverlay) {
+        videoAreaOverlay.style.cursor = "pointer";
+    }
 
     if (state.controllerHideTimer) {
         clearTimeout(state.controllerHideTimer);
@@ -795,6 +801,11 @@ function showController() {
         ) {
             state.controllerElement.classList.add("hidden");
             state.isControllerVisible = false;
+            
+            // Hide cursor when controls are hidden
+            if (videoAreaOverlay) {
+                videoAreaOverlay.style.cursor = "none";
+            }
         }
     }, CONTROLLER_HIDE_DELAY);
 }
