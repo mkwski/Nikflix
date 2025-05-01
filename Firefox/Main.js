@@ -106,8 +106,8 @@ function timeFormat(timeInSeconds) {
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
   return `${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
+      .toString()
+      .padStart(2, "0")}`;
 }
 
 /**
@@ -126,13 +126,13 @@ function updateProgression() {
     const totalTime = Math.floor(videoElement.duration);
 
     if (
-      state.lastScreenTime !== currentTime ||
-      state.lastTotalTime !== totalTime
+        state.lastScreenTime !== currentTime ||
+        state.lastTotalTime !== totalTime
     ) {
       state.lastScreenTime = currentTime;
       state.lastTotalTime = totalTime;
       screenTime.textContent = `${timeFormat(currentTime)} / ${timeFormat(
-        totalTime
+          totalTime
       )}`;
     }
   }
@@ -157,8 +157,10 @@ function toggleFullScreen() {
     } else if (fullscreenElement.msRequestFullscreen) {
       fullscreenElement.msRequestFullscreen();
     }
-    state.buttonFullScreen.innerHTML =
-      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 3.41L16.41 9L18 10.59L23.59 5L22 3.41M2 5L7.59 10.59L9.18 9L3.59 3.41L2 5M18 13.41L16.41 15L22 20.59L23.59 19L18 13.41M9.18 15L7.59 13.41L2 19L3.59 20.59L9.18 15Z" fill="white"/></svg>';
+    if (state.buttonFullScreen) {
+      state.buttonFullScreen.innerHTML =
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 3.41L16.41 9L18 10.59L23.59 5L22 3.41M2 5L7.59 10.59L9.18 9L3.59 3.41L2 5M18 13.41L16.41 15L22 20.59L23.59 19L18 13.41M9.18 15L7.59 13.41L2 19L3.59 20.59L9.18 15Z" fill="white"/></svg>';
+    }
   } else {
     if (document.exitFullscreen) {
       document.exitFullscreen();
@@ -169,8 +171,10 @@ function toggleFullScreen() {
     } else if (document.msExitFullscreen) {
       document.msExitFullscreen();
     }
-    state.buttonFullScreen.innerHTML =
-      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
+    if (state.buttonFullScreen) {
+      state.buttonFullScreen.innerHTML =
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
+    }
   }
 }
 
@@ -707,7 +711,7 @@ function cleanController() {
 
   // Also clean up the video area overlay
   const videoAreaOverlay = document.getElementById(
-    "netflix-video-area-overlay"
+      "netflix-video-area-overlay"
   );
   if (videoAreaOverlay) {
     videoAreaOverlay.remove();
@@ -721,16 +725,15 @@ function cleanController() {
     state.subtitleSettingsPanel.remove();
   }
 
+  // Remove the back button
+  if (state.backButton) {
+    state.backButton.remove();
+  }
+
   // Remove keyboard event listener if exists
   if (state.keyboardListener) {
     document.removeEventListener("keydown", state.keyboardListener);
     state.keyboardListener = null;
-  }
-
-  // Remove back button if exists
-  if (state.backButton) {
-    state.backButton.remove();
-    state.backButton = null;
   }
 
   state = {
@@ -780,18 +783,29 @@ function showController() {
   state.controllerElement.classList.remove("hidden");
   state.isControllerVisible = true;
 
+  // Show cursor when controls are visible
+  const videoAreaOverlay = document.getElementById("netflix-video-area-overlay");
+  if (videoAreaOverlay) {
+    videoAreaOverlay.style.cursor = "pointer";
+  }
+
   if (state.controllerHideTimer) {
     clearTimeout(state.controllerHideTimer);
   }
 
   state.controllerHideTimer = setTimeout(() => {
     if (
-      state.controllerElement &&
-      !state.videoElement.paused &&
-      !state.subtitleSettingsOpen
+        state.controllerElement &&
+        !state.videoElement.paused &&
+        !state.subtitleSettingsOpen
     ) {
       state.controllerElement.classList.add("hidden");
       state.isControllerVisible = false;
+
+      // Hide cursor when controls are hidden
+      if (videoAreaOverlay) {
+        videoAreaOverlay.style.cursor = "none";
+      }
     }
   }, CONTROLLER_HIDE_DELAY);
 }
@@ -885,7 +899,7 @@ function detectSubtitleTracks() {
   try {
     // Find Netflix's subtitle menu
     const subtitleMenu = document.querySelector(
-      '[data-uia="video-subtitle-picker-label"]'
+        '[data-uia="video-subtitle-picker-label"]'
     );
     if (!subtitleMenu) return [];
 
@@ -894,16 +908,16 @@ function detectSubtitleTracks() {
 
     // Get all subtitle options
     const subtitleOptions = Array.from(
-      document.querySelectorAll('[data-uia="track-list-item"]')
+        document.querySelectorAll('[data-uia="track-list-item"]')
     );
 
     // Extract subtitle data
     const tracks = subtitleOptions.map((option) => {
       // Get language code from data attribute or class
       const langCode =
-        option.getAttribute("data-lang") ||
-        option.getAttribute("data-language") ||
-        extractLanguageCode(option.textContent);
+          option.getAttribute("data-lang") ||
+          option.getAttribute("data-language") ||
+          extractLanguageCode(option.textContent);
 
       return {
         name: option.textContent.trim(),
@@ -968,7 +982,6 @@ function extractLanguageCode(name) {
     turkish: "tr",
     türkçe: "tr",
   };
-
   for (const [langName, code] of Object.entries(langMap)) {
     if (nameLower.includes(langName)) {
       return code;
@@ -996,9 +1009,8 @@ function createSubtitleSettings() {
             <span class="subtitle-settings-label">Subtitles</span>
             <div class="subtitle-settings-control">
                 <label class="subtitle-toggle-switch">
-                    <input type="checkbox" id="subtitle-toggle-checkbox" ${
-                      state.subtitleEnabled ? "checked" : ""
-                    }>
+                    <input type="checkbox" id="subtitle-toggle-checkbox" ${state.subtitleEnabled ? "checked" : ""
+  }>
                     <span class="subtitle-toggle-slider"></span>
                 </label>
             </div>
@@ -1008,9 +1020,8 @@ function createSubtitleSettings() {
             <span class="subtitle-settings-label">Dual Subtitles</span>
             <div class="subtitle-settings-control">
                 <label class="subtitle-toggle-switch">
-                    <input type="checkbox" id="bilingual-toggle-checkbox" ${
-                      state.bilingualEnabled ? "checked" : ""
-                    }>
+                    <input type="checkbox" id="bilingual-toggle-checkbox" ${state.bilingualEnabled ? "checked" : ""
+  }>
                     <span class="subtitle-toggle-slider"></span>
                 </label>
             </div>
@@ -1037,66 +1048,52 @@ function createSubtitleSettings() {
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Primary Color</span>
             <div class="subtitle-settings-control">
-                <div class="color-option color-white ${
-                  state.primaryColor === "white" ? "selected" : ""
-                }" data-color="white"></div>
-                <div class="color-option color-yellow ${
-                  state.primaryColor === "#FFD700" ? "selected" : ""
-                }" data-color="#FFD700"></div>
-                <div class="color-option color-cyan ${
-                  state.primaryColor === "#00FFFF" ? "selected" : ""
-                }" data-color="#00FFFF"></div>
-                <div class="color-option color-green ${
-                  state.primaryColor === "#7FFF00" ? "selected" : ""
-                }" data-color="#7FFF00"></div>
-                <div class="color-option color-pink ${
-                  state.primaryColor === "#FF69B4" ? "selected" : ""
-                }" data-color="#FF69B4"></div>
+                <div class="color-option color-white ${state.primaryColor === "white" ? "selected" : ""
+  }" data-color="white"></div>
+                <div class="color-option color-yellow ${state.primaryColor === "#FFD700" ? "selected" : ""
+  }" data-color="#FFD700"></div>
+                <div class="color-option color-cyan ${state.primaryColor === "#00FFFF" ? "selected" : ""
+  }" data-color="#00FFFF"></div>
+                <div class="color-option color-green ${state.primaryColor === "#7FFF00" ? "selected" : ""
+  }" data-color="#7FFF00"></div>
+                <div class="color-option color-pink ${state.primaryColor === "#FF69B4" ? "selected" : ""
+  }" data-color="#FF69B4"></div>
             </div>
         </div>
         
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Secondary Color</span>
             <div class="subtitle-settings-control">
-                <div class="color-option color-white ${
-                  state.secondaryColor === "white" ? "selected" : ""
-                }" data-color="white"></div>
-                <div class="color-option color-yellow ${
-                  state.secondaryColor === "#FFD700" ? "selected" : ""
-                }" data-color="#FFD700"></div>
-                <div class="color-option color-cyan ${
-                  state.secondaryColor === "#00FFFF" ? "selected" : ""
-                }" data-color="#00FFFF"></div>
-                <div class="color-option color-green ${
-                  state.secondaryColor === "#7FFF00" ? "selected" : ""
-                }" data-color="#7FFF00"></div>
-                <div class="color-option color-pink ${
-                  state.secondaryColor === "#FF69B4" ? "selected" : ""
-                }" data-color="#FF69B4"></div>
+                <div class="color-option color-white ${state.secondaryColor === "white" ? "selected" : ""
+  }" data-color="white"></div>
+                <div class="color-option color-yellow ${state.secondaryColor === "#FFD700" ? "selected" : ""
+  }" data-color="#FFD700"></div>
+                <div class="color-option color-cyan ${state.secondaryColor === "#00FFFF" ? "selected" : ""
+  }" data-color="#00FFFF"></div>
+                <div class="color-option color-green ${state.secondaryColor === "#7FFF00" ? "selected" : ""
+  }" data-color="#7FFF00"></div>
+                <div class="color-option color-pink ${state.secondaryColor === "#FF69B4" ? "selected" : ""
+  }" data-color="#FF69B4"></div>
             </div>
         </div>
         
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Text Size</span>
             <div class="subtitle-settings-control">
-                <span class="size-option ${
-                  state.subtitleSize === "small" ? "selected" : ""
-                }" data-size="small">Small</span>
-                <span class="size-option ${
-                  state.subtitleSize === "medium" ? "selected" : ""
-                }" data-size="medium">Medium</span>
-                <span class="size-option ${
-                  state.subtitleSize === "large" ? "selected" : ""
-                }" data-size="large">Large</span>
+                <span class="size-option ${state.subtitleSize === "small" ? "selected" : ""
+  }" data-size="small">Small</span>
+                <span class="size-option ${state.subtitleSize === "medium" ? "selected" : ""
+  }" data-size="medium">Medium</span>
+                <span class="size-option ${state.subtitleSize === "large" ? "selected" : ""
+  }" data-size="large">Large</span>
             </div>
         </div>
         
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Background</span>
             <div class="subtitle-settings-control">
-                <input type="range" min="0" max="1" step="0.1" value="${
-                  state.subtitleBackgroundOpacity
-                }" id="subtitle-bg-opacity">
+                <input type="range" min="0" max="1" step="0.1" value="${state.subtitleBackgroundOpacity
+  }" id="subtitle-bg-opacity">
             </div>
         </div>
     `;
@@ -1105,61 +1102,61 @@ function createSubtitleSettings() {
 
   // Add event listeners for settings controls
   panel
-    .querySelector("#subtitle-toggle-checkbox")
-    .addEventListener("change", (e) => {
-      state.subtitleEnabled = e.target.checked;
-      toggleSubtitles(state.subtitleEnabled);
-    });
+      .querySelector("#subtitle-toggle-checkbox")
+      .addEventListener("change", (e) => {
+        state.subtitleEnabled = e.target.checked;
+        toggleSubtitles(state.subtitleEnabled);
+      });
 
   panel
-    .querySelector("#bilingual-toggle-checkbox")
-    .addEventListener("change", (e) => {
-      state.bilingualEnabled = e.target.checked;
-      if (state.bilingualEnabled) {
-        enableBilingualSubtitles();
-      } else {
-        disableBilingualSubtitles();
-      }
-    });
+      .querySelector("#bilingual-toggle-checkbox")
+      .addEventListener("change", (e) => {
+        state.bilingualEnabled = e.target.checked;
+        if (state.bilingualEnabled) {
+          enableBilingualSubtitles();
+        } else {
+          disableBilingualSubtitles();
+        }
+      });
 
   panel
-    .querySelector("#primary-language-select")
-    .addEventListener("change", (e) => {
-      state.primaryLanguage = e.target.value;
-      if (state.bilingualEnabled) {
-        // Force refresh of subtitle settings
-        disableBilingualSubtitles();
-        enableBilingualSubtitles();
-      }
-    });
+      .querySelector("#primary-language-select")
+      .addEventListener("change", (e) => {
+        state.primaryLanguage = e.target.value;
+        if (state.bilingualEnabled) {
+          // Force refresh of subtitle settings
+          disableBilingualSubtitles();
+          enableBilingualSubtitles();
+        }
+      });
 
   panel
-    .querySelector("#secondary-language-select")
-    .addEventListener("change", (e) => {
-      state.secondaryLanguage = e.target.value;
-      if (state.bilingualEnabled) {
-        // Force refresh of subtitle settings
-        disableBilingualSubtitles();
-        enableBilingualSubtitles();
-      }
-    });
+      .querySelector("#secondary-language-select")
+      .addEventListener("change", (e) => {
+        state.secondaryLanguage = e.target.value;
+        if (state.bilingualEnabled) {
+          // Force refresh of subtitle settings
+          disableBilingualSubtitles();
+          enableBilingualSubtitles();
+        }
+      });
 
   // Color selection for subtitles
   panel.querySelectorAll(".color-option").forEach((option) => {
     option.addEventListener("click", (e) => {
       const color = e.target.getAttribute("data-color");
       const isForPrimary = e.target
-        .closest(".subtitle-settings-row")
-        .querySelector(".subtitle-settings-label")
-        .textContent.includes("Primary");
+          .closest(".subtitle-settings-row")
+          .querySelector(".subtitle-settings-label")
+          .textContent.includes("Primary");
 
       // Update selected UI
       e.target
-        .closest(".subtitle-settings-control")
-        .querySelectorAll(".color-option")
-        .forEach((el) => {
-          el.classList.remove("selected");
-        });
+          .closest(".subtitle-settings-control")
+          .querySelectorAll(".color-option")
+          .forEach((el) => {
+            el.classList.remove("selected");
+          });
       e.target.classList.add("selected");
 
       // Update color state
@@ -1224,7 +1221,7 @@ function toggleSubtitles(enabled) {
 
   // Find Netflix's subtitle menu
   const subtitleMenu = document.querySelector(
-    '[data-uia="video-subtitle-picker-label"]'
+      '[data-uia="video-subtitle-picker-label"]'
   );
   if (!subtitleMenu) return;
 
@@ -1239,14 +1236,14 @@ function toggleSubtitles(enabled) {
       if (enabled) {
         // Find option for primary language
         const options = Array.from(
-          document.querySelectorAll('[data-uia="track-list-item"]')
+            document.querySelectorAll('[data-uia="track-list-item"]')
         );
 
         for (const option of options) {
           const langCode =
-            option.getAttribute("data-lang") ||
-            option.getAttribute("data-language") ||
-            extractLanguageCode(option.textContent);
+              option.getAttribute("data-lang") ||
+              option.getAttribute("data-language") ||
+              extractLanguageCode(option.textContent);
 
           if (langCode === state.primaryLanguage) {
             targetOption = option;
@@ -1257,13 +1254,13 @@ function toggleSubtitles(enabled) {
         // If no match found, select first non-off option
         if (!targetOption) {
           targetOption = options.find(
-            (opt) => !opt.textContent.includes("Off")
+              (opt) => !opt.textContent.includes("Off")
           );
         }
       } else {
         // Find "Off" option
         targetOption = Array.from(
-          document.querySelectorAll('[data-uia="track-list-item"]')
+            document.querySelectorAll('[data-uia="track-list-item"]')
         ).find((opt) => opt.textContent.includes("Off"));
       }
 
@@ -1329,7 +1326,7 @@ function enableBilingualSubtitles() {
 
   // Process any existing subtitles
   const existingSubtitle = subtitleContainer.querySelector(
-    ".player-timedtext-text-container"
+      ".player-timedtext-text-container"
   );
   if (existingSubtitle) {
     processSubtitleElement(existingSubtitle).catch((err) => {
@@ -1356,7 +1353,7 @@ function disableBilingualSubtitles() {
 
   // Find subtitle elements and restore them
   const subtitleElements = document.querySelectorAll(
-    ".player-timedtext-text-container"
+      ".player-timedtext-text-container"
   );
   subtitleElements.forEach((element) => {
     // Remove dual subtitle formatting but keep original text
@@ -1378,7 +1375,7 @@ function handleSubtitleChange(mutations) {
     if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
       // Check for added subtitle nodes
       const subtitleElement = mutation.target.querySelector(
-        ".player-timedtext-text-container"
+          ".player-timedtext-text-container"
       );
 
       if (subtitleElement) {
@@ -1408,7 +1405,7 @@ async function processSubtitleElement(element) {
 
     if (timeSinceLastRequest < state.translationDelay) {
       await new Promise((resolve) =>
-        setTimeout(resolve, state.translationDelay - timeSinceLastRequest)
+          setTimeout(resolve, state.translationDelay - timeSinceLastRequest)
       );
     }
 
@@ -1416,9 +1413,9 @@ async function processSubtitleElement(element) {
 
     // Translate using Google Translate
     const translation = await translateText(
-      primaryText,
-      state.primaryLanguage,
-      state.secondaryLanguage
+        primaryText,
+        state.primaryLanguage,
+        state.secondaryLanguage
     );
 
     // Replace content with dual-language format and add wrapper div for better centering
@@ -1456,8 +1453,8 @@ function updateSubtitleStyles() {
   root.style.setProperty("--primary-color", state.primaryColor);
   root.style.setProperty("--secondary-color", state.secondaryColor);
   root.style.setProperty(
-    "--subtitle-bg-opacity",
-    state.subtitleBackgroundOpacity
+      "--subtitle-bg-opacity",
+      state.subtitleBackgroundOpacity
   );
 
   // Set size variables
@@ -1534,13 +1531,13 @@ function setupKeyboardShortcuts() {
           videoElement.play();
           if (state.buttonPlayPause) {
             state.buttonPlayPause.innerHTML =
-              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+                '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
           }
         } else {
           videoElement.pause();
           if (state.buttonPlayPause) {
             state.buttonPlayPause.innerHTML =
-              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+                '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
           }
         }
         break;
@@ -1580,8 +1577,8 @@ function setupKeyboardShortcuts() {
         const volumeIcon = document.getElementById("netflix-volume-icon");
         if (volumeIcon) {
           volumeIcon.innerHTML = videoElement.muted
-            ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
-            : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
+              ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
+              : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
         }
         showMessage(videoElement.muted ? "Muted" : "Unmuted");
         break;
@@ -1592,7 +1589,7 @@ function setupKeyboardShortcuts() {
         e.stopPropagation();
         toggleFullScreen();
         showMessage(
-          document.fullscreenElement ? "Fullscreen Mode" : "Exit Fullscreen"
+            document.fullscreenElement ? "Fullscreen Mode" : "Exit Fullscreen"
         );
         break;
 
@@ -1606,7 +1603,7 @@ function setupKeyboardShortcuts() {
         // Update settings panel if open
         if (state.subtitleSettingsPanel) {
           state.subtitleSettingsPanel.querySelector(
-            "#subtitle-toggle-checkbox"
+              "#subtitle-toggle-checkbox"
           ).checked = state.subtitleEnabled;
         }
         break;
@@ -1625,7 +1622,7 @@ function setupKeyboardShortcuts() {
             // Update settings panel if open
             if (state.subtitleSettingsPanel) {
               state.subtitleSettingsPanel.querySelector(
-                "#subtitle-toggle-checkbox"
+                  "#subtitle-toggle-checkbox"
               ).checked = true;
             }
           } else {
@@ -1638,12 +1635,12 @@ function setupKeyboardShortcuts() {
         // Update settings panel if open
         if (state.subtitleSettingsPanel) {
           state.subtitleSettingsPanel.querySelector(
-            "#bilingual-toggle-checkbox"
+              "#bilingual-toggle-checkbox"
           ).checked = state.bilingualEnabled;
         }
         break;
 
-      // Add other shortcuts as needed
+        // Add other shortcuts as needed
     }
   };
 
@@ -1888,20 +1885,20 @@ function createVideoAreaOverlay() {
   videoAreaOverlay.addEventListener("click", (e) => {
     // Prevent clicks on controller from triggering this
     if (
-      !e.target.closest("#mon-controleur-netflix") &&
-      !e.target.closest("#netflix-subtitle-settings")
+        !e.target.closest("#mon-controleur-netflix") &&
+        !e.target.closest("#netflix-subtitle-settings")
     ) {
       if (state.videoElement.paused) {
         state.videoElement.play();
         if (state.buttonPlayPause) {
           state.buttonPlayPause.innerHTML =
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
         }
       } else {
         state.videoElement.pause();
         if (state.buttonPlayPause) {
           state.buttonPlayPause.innerHTML =
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+              '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
         }
       }
     }
@@ -1911,8 +1908,8 @@ function createVideoAreaOverlay() {
   videoAreaOverlay.addEventListener("dblclick", (e) => {
     // Prevent double-click on controller
     if (
-      !e.target.closest("#mon-controleur-netflix") &&
-      !e.target.closest("#netflix-subtitle-settings")
+        !e.target.closest("#mon-controleur-netflix") &&
+        !e.target.closest("#netflix-subtitle-settings")
     ) {
       toggleFullScreen();
     }
@@ -1979,25 +1976,25 @@ function addMediaController() {
   state.buttonPlayPause = document.createElement("button");
   state.buttonPlayPause.id = "netflix-play-pause";
   state.buttonPlayPause.innerHTML = state.videoElement.paused
-    ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>'
-    : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+      ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>'
+      : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
 
   state.buttonFullScreen = document.createElement("button");
   state.buttonFullScreen.id = "netflix-plein-ecran";
   state.buttonFullScreen.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L6 7L7.41 5.59L12 10.17L16.59 5.59M16.59 18.41L12 13.83L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L6 7L7.41 5.59L12 10.17L16.59 5.59M16.59 18.41L12 13.83L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
 
   // Subtitle toggle button
   const subtitleToggle = document.createElement("button");
   subtitleToggle.id = "netflix-subtitle-toggle";
   subtitleToggle.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,4H4C2.9,4 2,4.9 2,6V18C2,19.1 2.9,20 4,20H20C21.1,20 22,19.1 22,18V6C22,4.9 21.1,4 20,4M20,18H4V6H20V18M6,10H8V12H6V10M6,14H14V16H6V14M16,14H18V16H16V14M10,10H18V12H10Z" fill="white"/></svg>';
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,4H4C2.9,4 2,4.9 2,6V18C2,19.1 2.9,20 4,20H20C21.1,20 22,19.1 22,18V6C22,4.9 21.1,4 20,4M20,18H4V6H20V18M6,10H8V12H6V10M6,14H14V16H6V14M16,14H18V16H16V14M10,10H18V12H10Z" fill="white"/></svg>';
 
   // Bilingual subtitle toggle button
   const bilingualToggle = document.createElement("button");
   bilingualToggle.id = "netflix-bilingual-toggle";
   bilingualToggle.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07M18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10M15.88 17L17.5 12.67L19.12 17H15.88Z" fill="white"/></svg>';
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07M18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10M15.88 17L17.5 12.67L19.12 17H15.88Z" fill="white"/></svg>';
 
   const barreContainer = document.createElement("div");
   barreContainer.id = "netflix-barre-container";
@@ -2015,7 +2012,7 @@ function addMediaController() {
   const volumeIcon = document.createElement("div");
   volumeIcon.id = "netflix-volume-icon";
   volumeIcon.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
 
   const volumeSliderContainer = document.createElement("div");
   volumeSliderContainer.id = "netflix-volume-slider-container";
@@ -2029,40 +2026,40 @@ function addMediaController() {
 
   const handleControlsClick = (e) => {
     if (
-      e.target === state.buttonPlayPause ||
-      e.target.closest("#netflix-play-pause")
+        e.target === state.buttonPlayPause ||
+        e.target.closest("#netflix-play-pause")
     ) {
       if (state.videoElement.paused) {
         state.videoElement.play();
         state.buttonPlayPause.innerHTML =
-          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
       } else {
         state.videoElement.pause();
         state.buttonPlayPause.innerHTML =
-          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
       }
     } else if (
-      e.target === state.buttonFullScreen ||
-      e.target.closest("#netflix-plein-ecran")
+        e.target === state.buttonFullScreen ||
+        e.target.closest("#netflix-plein-ecran")
     ) {
       toggleFullScreen();
     } else if (
-      e.target === volumeIcon ||
-      e.target.closest("#netflix-volume-icon")
+        e.target === volumeIcon ||
+        e.target.closest("#netflix-volume-icon")
     ) {
       state.videoElement.muted = !state.videoElement.muted;
       volumeIcon.innerHTML = state.videoElement.muted
-        ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
-        : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
+          ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
+          : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
     } else if (
-      e.target === subtitleToggle ||
-      e.target.closest("#netflix-subtitle-toggle")
+        e.target === subtitleToggle ||
+        e.target.closest("#netflix-subtitle-toggle")
     ) {
       // Toggle subtitle settings panel
       toggleSubtitleSettings();
     } else if (
-      e.target === bilingualToggle ||
-      e.target.closest("#netflix-bilingual-toggle")
+        e.target === bilingualToggle ||
+        e.target.closest("#netflix-bilingual-toggle")
     ) {
       // Toggle bilingual subtitles directly
       state.bilingualEnabled = !state.bilingualEnabled;
@@ -2076,7 +2073,7 @@ function addMediaController() {
           // Update settings panel if open
           if (state.subtitleSettingsPanel) {
             state.subtitleSettingsPanel.querySelector(
-              "#subtitle-toggle-checkbox"
+                "#subtitle-toggle-checkbox"
             ).checked = true;
           }
         } else {
@@ -2089,7 +2086,7 @@ function addMediaController() {
       // Update settings panel if open
       if (state.subtitleSettingsPanel) {
         state.subtitleSettingsPanel.querySelector(
-          "#bilingual-toggle-checkbox"
+            "#bilingual-toggle-checkbox"
         ).checked = state.bilingualEnabled;
       }
     }
@@ -2100,9 +2097,9 @@ function addMediaController() {
     state.videoElement.volume = volume;
     state.videoElement.muted = volume === 0;
     volumeIcon.innerHTML =
-      volume === 0
-        ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
-        : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
+        volume === 0
+            ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
+            : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
   });
 
   state.controllerElement.addEventListener("click", handleControlsClick);
@@ -2110,22 +2107,22 @@ function addMediaController() {
   document.addEventListener("fullscreenchange", () => {
     if (state.buttonFullScreen) {
       state.buttonFullScreen.innerHTML = document.fullscreenElement
-        ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 3.41L16.41 9L18 10.59L23.59 5L22 3.41M2 5L7.59 10.59L9.18 9L3.59 3.41L2 5M18 13.41L16.41 15L22 20.59L23.59 19L18 13.41M9.18 15L7.59 13.41L2 19L3.59 20.59L9.18 15Z" fill="white"/></svg>'
-        : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
+          ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 3.41L16.41 9L18 10.59L23.59 5L22 3.41M2 5L7.59 10.59L9.18 9L3.59 3.41L2 5M18 13.41L16.41 15L22 20.59L23.59 19L18 13.41M9.18 15L7.59 13.41L2 19L3.59 20.59L9.18 15Z" fill="white"/></svg>'
+          : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
     }
   });
 
   state.videoElement.addEventListener("play", () => {
     if (state.buttonPlayPause)
       state.buttonPlayPause.innerHTML =
-        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
     showController();
   });
 
   state.videoElement.addEventListener("pause", () => {
     if (state.buttonPlayPause)
       state.buttonPlayPause.innerHTML =
-        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
     if (state.controllerElement) {
       state.controllerElement.classList.remove("hidden");
       state.isControllerVisible = true;
@@ -2143,12 +2140,12 @@ function addMediaController() {
   // Prevent Netflix from stealing focus
   document.addEventListener("focusin", (e) => {
     if (
-      state.isControllerAdded &&
-      !e.target.closest("#mon-controleur-netflix") &&
-      !e.target.closest("#netflix-subtitle-settings") &&
-      e.target.tagName !== "INPUT" &&
-      e.target.tagName !== "TEXTAREA" &&
-      state.videoOverlay
+        state.isControllerAdded &&
+        !e.target.closest("#mon-controleur-netflix") &&
+        !e.target.closest("#netflix-subtitle-settings") &&
+        e.target.tagName !== "INPUT" &&
+        e.target.tagName !== "TEXTAREA" &&
+        state.videoOverlay
     ) {
       // Wait to avoid focus fighting and only if not user-initiated
       if (!state.userInitiatedFocus) {
@@ -2180,17 +2177,17 @@ function addMediaController() {
   state.videoOverlay.addEventListener("click", (e) => {
     // Prevent clicks on controller from triggering this
     if (
-      !e.target.closest("#mon-controleur-netflix") &&
-      !e.target.closest("#netflix-subtitle-settings")
+        !e.target.closest("#mon-controleur-netflix") &&
+        !e.target.closest("#netflix-subtitle-settings")
     ) {
       if (state.videoElement.paused) {
         state.videoElement.play();
         state.buttonPlayPause.innerHTML =
-          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
       } else {
         state.videoElement.pause();
         state.buttonPlayPause.innerHTML =
-          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
+            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5V19L19 12L8 5Z" fill="white"/></svg>';
       }
     }
   });
@@ -2249,7 +2246,7 @@ function addMediaController() {
 
     // Send to injected script for custom seeking
     window.dispatchEvent(
-      new CustomEvent("netflixSeekTo", { detail: seekTime })
+        new CustomEvent("netflixSeekTo", { detail: seekTime })
     );
   });
 
@@ -2274,7 +2271,7 @@ function addMediaController() {
     }, 1000);
   }
 
-  // Create back button
+  // Create and add back button
   createBackButton();
 }
 
@@ -2285,7 +2282,7 @@ function addMediaController() {
 function removeElementsByClasses(classesNames) {
   classesNames.forEach((className) => {
     const elementsToRemove = document.querySelectorAll(
-      `[class*="${className}"]`
+        `[class*="${className}"]`
     );
     if (elementsToRemove.length > 0) {
       elementsToRemove.forEach((el) => el.remove());
@@ -2334,11 +2331,11 @@ const observer = new MutationObserver((mutations) => {
           // More robust class checking
           const nodeClassName = node.className || "";
           return (
-            node.querySelector("video") ||
-            CLASSES_TO_REMOVE.some(
-              (c) =>
-                typeof nodeClassName === "string" && nodeClassName.includes(c)
-            )
+              node.querySelector("video") ||
+              CLASSES_TO_REMOVE.some(
+                  (c) =>
+                      typeof nodeClassName === "string" && nodeClassName.includes(c)
+              )
           );
         }
         return false;
@@ -2366,7 +2363,7 @@ if (document.readyState === "loading") {
 }
 
 /**
- * Create and add back button to the top left corner
+ * Create and add back button to exit Netflix video player
  */
 function createBackButton() {
   if (state.backButton) return; // Don't create if it already exists
@@ -2374,7 +2371,7 @@ function createBackButton() {
   state.backButton = document.createElement("button");
   state.backButton.id = "netflix-back-button";
   state.backButton.innerHTML =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="white"/></svg>';
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="white"/></svg>';
 
   // Style the back button
   state.backButton.style.position = "fixed";
@@ -2410,10 +2407,10 @@ function createBackButton() {
 
     // Approach 1: Look for Netflix's own back button and click it
     const netflixBackButton =
-      document.querySelector('button[data-uia="player-back-to-browse"]') ||
-      document.querySelector(".button-nfplayerBack") ||
-      document.querySelector("button.nf-player-container button") ||
-      document.querySelector('button[aria-label="Back to Browse"]');
+        document.querySelector('button[data-uia="player-back-to-browse"]') ||
+        document.querySelector(".button-nfplayerBack") ||
+        document.querySelector("button.nf-player-container button") ||
+        document.querySelector('button[aria-label="Back to Browse"]');
 
     if (netflixBackButton) {
       netflixBackButton.click();
@@ -2434,8 +2431,8 @@ function createBackButton() {
 
     // Approach 3: Look for back button within specific Netflix player containers
     const playerContainer =
-      document.querySelector(".nf-player-container") ||
-      document.querySelector(".watch-video--player-view");
+        document.querySelector(".nf-player-container") ||
+        document.querySelector(".watch-video--player-view");
 
     if (playerContainer) {
       const backBtn = playerContainer.querySelector("button");
@@ -2481,9 +2478,9 @@ function createBackButton() {
     clearTimeout(originalControllerHideTimer);
     state.controllerHideTimer = setTimeout(() => {
       if (
-        state.controllerElement &&
-        !state.videoElement.paused &&
-        !state.subtitleSettingsOpen
+          state.controllerElement &&
+          !state.videoElement.paused &&
+          !state.subtitleSettingsOpen
       ) {
         state.controllerElement.classList.add("hidden");
         state.isControllerVisible = false;
