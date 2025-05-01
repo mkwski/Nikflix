@@ -1,4 +1,4 @@
-# Netflix Password-Sharing Bypass Extension
+# Netflix Password-Sharing (household) Bypass Extension
 
 An extension that allows bypassing Netflix's password-sharing restrictions.
 If you like this project, consider giving it a star ⭐
@@ -62,6 +62,8 @@ If you would like to improve the extension, feel free to submit a Pull Request o
 - 📌 [GitHub Profile](https://github.com/myanpetra99)
 - 👤 **@IshaanM8**
 - 📌 [GitHub Profile](https://github.com/IshaanM8)
+- 👤 **@mrobeidat**
+- 📌 [GitHub Profile](https://github.com/mrobeidat)
 
 
 **License** MIT License
