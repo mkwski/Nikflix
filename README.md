@@ -7,6 +7,9 @@ If you like this project, consider giving it a star ⭐
 
 [![Download on Firefox](https://img.shields.io/badge/Download-Firefox-orange?logo=firefox)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
 
+## Installation on Chrome, Edge, Brave , or any other Chromium-based browser
+
+[![Download on Chrome](https://img.shields.io/badge/Download-Chrome-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/nikflix/knjoabokknkpkhbbdclmnjcoeedmgema?hl=en-GB&authuser=0)
 
 ## Installation on Chromium Browsers (Developer Mode)
 
