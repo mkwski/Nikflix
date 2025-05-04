@@ -1985,11 +1985,26 @@ function addMediaController() {
     state.buttonFullScreen.innerHTML =
         '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L6 7L7.41 5.59L12 10.17L16.59 5.59M16.59 18.41L12 13.83L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
 
-    // Next
+    // Jump to next espisode button
     const nextEpisodeButton = document.createElement("button");
     nextEpisodeButton.id = "netflix-next-episode";
     nextEpisodeButton.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="NextEpisodeStandard" aria-hidden="true"><path fill="white" d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>';
+
+    // grey out the next episode button (default)
+    nextEpisodeButton.disabled = true;
+    nextEpisodeButton.style.opacity = "0.5";
+    // enable button if next episode is available
+    getNextEpisodeId().then((nextEpisodeId) => {
+        if (nextEpisodeId) {
+            nextEpisodeButton.disabled = false;
+            nextEpisodeButton.style.opacity = "1"; // Enable button
+        } else {
+            nextEpisodeButton.disabled = true;
+            nextEpisodeButton.style.opacity = "0.5"; // Greyed out
+        }
+    });
+
 
     // Subtitle toggle button
     const subtitleToggle = document.createElement("button");
@@ -2543,7 +2558,7 @@ function getNextEpisodeId() {
         // Get the next episode
         const nextEpisode = episodes[curEpisodeIndex + 1] || null;
         if (nextEpisode) {
-            return nextEpisode.id; // Return the next episode ID
+            return nextEpisode.id;
         } else {
             console.log("No next episode found");
             return null;
