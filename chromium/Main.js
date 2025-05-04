@@ -2060,7 +2060,7 @@ function addMediaController() {
                 : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
         } else if(e.target === nextEpisodeButton || e.target.closest("#netflix-next-episode")) {
             // Trigger next episode action
-            jumpToNextEpsode();
+            jumpToNextEpisode();
         } else if (
             e.target === subtitleToggle ||
             e.target.closest("#netflix-subtitle-toggle")
@@ -2511,38 +2511,62 @@ function getIdFromUrl() {
   return null;
 }
 
-function jumpToNextEpsode() {
-    const curEpisodeId = getIdFromUrl();
-    if(curEpisodeId) {
-        fetch(`https://www.netflix.com/nq/website/memberapi/release/metadata?movieid=${curEpisodeId}`, {
-            credentials: "include", // Important: includes your session cookies
-          })
-            .then(response => response.json())
-            .then(response => {
-                const episodes = response.video.seasons.reduce((acc, season) => {
-                    if (season.episodes) {
-                      acc.push(...season.episodes);
-                    }
-                    return acc;
-                  }, []);
-                  console.log("cur: ",curEpisodeId);
-                  const curEpisodeIndex = episodes.findIndex(episode => episode.id.toString() === curEpisodeId);
-                  if(curEpisodeIndex === -1) {
-                    console.log("Current episode not found");
-                    return;
-                  }
-                  const nextEpisode = episodes[curEpisodeIndex + 1] || null;
-                    if (nextEpisode) {
-                        const nextEpisodeId = nextEpisode.id;
-                        const nextEpisodeUrl = `https://www.netflix.com/watch/${nextEpisodeId}`;
-                        window.location.href = nextEpisodeUrl;
-                    } else {
-                        console.log("No next episode found");
-                    }
-                  console.log(nextEpisode);
-            })
-            .catch(error => console.error("Error fetching metadata:", error));
+function getNextEpisodeId() {
+    const curEpisodeId = getIdFromUrl(); // Get current episode ID from the URL
+    if (!curEpisodeId) {
+        console.log("No current episode ID found in URL");
+        return null;
     }
 
+    // Fetch the metadata for the current episode
+    return fetch(`https://www.netflix.com/nq/website/memberapi/release/metadata?movieid=${curEpisodeId}`, {
+        credentials: "include", // Important: includes your session cookies
+    })
+    .then(response => response.json())
+    .then(response => {
+        const episodes = response.video.seasons.reduce((acc, season) => {
+            if (season.episodes) {
+                acc.push(...season.episodes);
+            }
+            return acc;
+        }, []);
+
+        console.log("Current Episode ID: ", curEpisodeId);
+
+        // Find the index of the current episode
+        const curEpisodeIndex = episodes.findIndex(episode => episode.id.toString() === curEpisodeId);
+        if (curEpisodeIndex === -1) {
+            console.log("Current episode not found");
+            return null;
+        }
+
+        // Get the next episode
+        const nextEpisode = episodes[curEpisodeIndex + 1] || null;
+        if (nextEpisode) {
+            return nextEpisode.id; // Return the next episode ID
+        } else {
+            console.log("No next episode found");
+            return null;
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching metadata:", error);
+        return null;
+    });
+}
+
+function jumpToNextEpisode() {
+    getNextEpisodeId()
+        .then(nextEpisodeId => {
+            if (nextEpisodeId) {
+                const nextEpisodeUrl = `https://www.netflix.com/watch/${nextEpisodeId}`;
+                window.location.href = nextEpisodeUrl; // Redirect to the next episode
+            } else {
+                console.log("No next episode found or error fetching data.");
+            }
+        })
+        .catch(error => {
+            console.error("Error jumping to next episode:", error);
+        });
     console.log("Next episode triggered....");
 }
