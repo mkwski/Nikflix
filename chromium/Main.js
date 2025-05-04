@@ -285,6 +285,7 @@ function createStylesIfNeeded() {
 
 #netflix-play-pause, 
 #netflix-plein-ecran,
+#netflix-next-episode,
 #netflix-subtitle-toggle,
 #netflix-bilingual-toggle {
     background-color: transparent;
@@ -1984,6 +1985,12 @@ function addMediaController() {
     state.buttonFullScreen.innerHTML =
         '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L6 7L7.41 5.59L12 10.17L16.59 5.59M16.59 18.41L12 13.83L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
 
+    // Next
+    const nextEpisodeButton = document.createElement("button");
+    nextEpisodeButton.id = "netflix-next-episode";
+    nextEpisodeButton.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="NextEpisodeStandard" aria-hidden="true"><path fill="white" d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>';
+
     // Subtitle toggle button
     const subtitleToggle = document.createElement("button");
     subtitleToggle.id = "netflix-subtitle-toggle";
@@ -2051,6 +2058,9 @@ function addMediaController() {
             volumeIcon.innerHTML = state.videoElement.muted
                 ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
                 : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
+        } else if(e.target === nextEpisodeButton || e.target.closest("#netflix-next-episode")) {
+            // Trigger next episode action
+            jumpToNextEpsode();
         } else if (
             e.target === subtitleToggle ||
             e.target.closest("#netflix-subtitle-toggle")
@@ -2212,6 +2222,7 @@ function addMediaController() {
     controlsLeft.appendChild(volumeContainer);
     controlsLeft.appendChild(state.screenTime);
 
+    controlsRight.appendChild(nextEpisodeButton);
     controlsRight.appendChild(bilingualToggle);
     controlsRight.appendChild(subtitleToggle);
     controlsRight.appendChild(state.buttonFullScreen);
@@ -2488,4 +2499,50 @@ function createBackButton() {
             }
         }, CONTROLLER_HIDE_DELAY);
     }
+}
+
+function getIdFromUrl() {
+  const url = window.location.href;
+  const parts = url.split('/');
+  const watchIndex = parts.indexOf('watch');
+  if (watchIndex !== -1 && watchIndex + 1 < parts.length) {
+    return parts[watchIndex + 1].split('?')[0];
+  }
+  return null;
+}
+
+function jumpToNextEpsode() {
+    const curEpisodeId = getIdFromUrl();
+    if(curEpisodeId) {
+        fetch(`https://www.netflix.com/nq/website/memberapi/release/metadata?movieid=${curEpisodeId}`, {
+            credentials: "include", // Important: includes your session cookies
+          })
+            .then(response => response.json())
+            .then(response => {
+                const episodes = response.video.seasons.reduce((acc, season) => {
+                    if (season.episodes) {
+                      acc.push(...season.episodes);
+                    }
+                    return acc;
+                  }, []);
+                  console.log("cur: ",curEpisodeId);
+                  const curEpisodeIndex = episodes.findIndex(episode => episode.id.toString() === curEpisodeId);
+                  if(curEpisodeIndex === -1) {
+                    console.log("Current episode not found");
+                    return;
+                  }
+                  const nextEpisode = episodes[curEpisodeIndex + 1] || null;
+                    if (nextEpisode) {
+                        const nextEpisodeId = nextEpisode.id;
+                        const nextEpisodeUrl = `https://www.netflix.com/watch/${nextEpisodeId}`;
+                        window.location.href = nextEpisodeUrl;
+                    } else {
+                        console.log("No next episode found");
+                    }
+                  console.log(nextEpisode);
+            })
+            .catch(error => console.error("Error fetching metadata:", error));
+    }
+
+    console.log("Next episode triggered....");
 }
