@@ -50,6 +50,9 @@ let state = {
     // Translation state
     lastTranslationRequest: 0,
     translationDelay: 300, // ms between translation requests to avoid rate limiting
+
+    // Episodes list state
+    episodesListOpen: false
 };
 
 // Constants
@@ -108,6 +111,86 @@ function timeFormat(timeInSeconds) {
     return `${minutes.toString().padStart(2, "0")}:${seconds
         .toString()
         .padStart(2, "0")}`;
+}
+
+/**
+ * Format duration to MM:SS
+ * @param {number} seconds - Duration in seconds
+ * @returns {string} Formatted duration
+ */
+function formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Show episodes list panel
+ */
+async function showEpisodesList() {
+    const curEpisodeId = getIdFromUrl();
+    if (!curEpisodeId) return;
+
+    try {
+        const response = await fetch(`https://www.netflix.com/nq/website/memberapi/release/metadata?movieid=${curEpisodeId}`, {
+            credentials: "include"
+        });
+        const data = await response.json();
+
+        // Remove existing panel if any
+        const existingPanel = document.getElementById('netflix-episodes-list');
+        if (existingPanel) existingPanel.remove();
+
+        // Create new panel
+        const panel = document.createElement('div');
+        panel.id = 'netflix-episodes-list';
+        panel.className = 'visible';
+
+        // Order seasons by sequence number
+        const seasons = data.video.seasons.sort((a, b) => a.seq - b.seq);
+
+        panel.innerHTML = `
+            <h3>${data.video.title}</h3>
+            ${seasons.map(season => `
+                <div class="season-container">
+                    <div class="season-header">Season ${season.seq}</div>
+                    ${season.episodes.map(episode => `
+                        <div class="episode-item ${episode.id.toString() === curEpisodeId ? 'current' : ''}" 
+                             data-episode-id="${episode.id}">
+                            <span class="episode-number">E${episode.seq}</span>
+                            <span class="episode-title">${episode.title}</span>
+                            <span class="episode-duration">${formatDuration(episode.runtime)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
+        `;
+
+        document.body.appendChild(panel);
+        state.episodesListOpen = true;
+
+        // Add click handlers
+        panel.querySelectorAll('.episode-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const episodeId = item.getAttribute('data-episode-id');
+                if (episodeId) {
+                    window.location.href = `https://www.netflix.com/watch/${episodeId}`;
+                }
+            });
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!panel.contains(e.target) &&
+                !e.target.closest('#netflix-episodes-button')) {
+                panel.remove();
+                state.episodesListOpen = false;
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching episodes:', error);
+    }
 }
 
 /**
@@ -457,6 +540,116 @@ function createStylesIfNeeded() {
     align-items: center;
 }
 
+/* Episodes list styles */
+#netflix-episodes-list {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: 70vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 5px;
+    padding: 15px;
+    z-index: 10001;
+    display: none;
+    color: white;
+    font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+}
+
+#netflix-episodes-list.visible {
+    display: block;
+}
+
+#netflix-episodes-list h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+}
+
+.season-container {
+    margin-bottom: 25px;
+}
+
+.season-container:last-child {
+    margin-bottom: 0;
+}
+
+.season-header {
+    font-size: 16px;
+    font-weight: 500;
+    color: #E50914;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 12px;
+}
+
+.episode-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.episode-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.episode-item.current {
+    background-color: rgba(229, 9, 20, 0.3);
+}
+
+.episode-number {
+    min-width: 30px;
+    font-weight: 500;
+    color: #E50914;
+}
+
+.episode-title {
+    flex: 1;
+    margin-left: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.episode-duration {
+    margin-left: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+}
+
+#netflix-episodes-button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#netflix-episodes-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+#netflix-episodes-button:active {
+    transform: scale(0.95);
+}
+
 /* Subtitle settings panel styles */
 #netflix-subtitle-settings {
     position: absolute;
@@ -678,6 +871,92 @@ input:checked + .subtitle-toggle-slider:before {
     --medium-subtitle-size: 2.7em;
     --large-subtitle-size: 3em;
 }
+
+/* Episodes list panel styles */
+#netflix-episodes-list {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 400px;
+    max-height: 70vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    border-radius: 8px;
+    padding: 20px;
+    z-index: 10001;
+    display: none;
+    color: white;
+    font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #E50914 rgba(255, 255, 255, 0.1);
+}
+
+#netflix-episodes-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#netflix-episodes-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#netflix-episodes-list::-webkit-scrollbar-thumb {
+    background: #E50914;
+    border-radius: 4px;
+}
+
+#netflix-episodes-list.visible {
+    display: block;
+}
+
+#netflix-episodes-list h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    text-align: left;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.episode-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.episode-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.episode-item.current {
+    background-color: rgba(229, 9, 20, 0.3);
+}
+
+.episode-number {
+    min-width: 30px;
+    font-weight: 500;
+    color: #E50914;
+}
+
+.episode-title {
+    flex: 1;
+    margin-left: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.episode-duration {
+    margin-left: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+}
     `;
         document.body.appendChild(style);
     }
@@ -783,7 +1062,7 @@ function showController() {
 
     state.controllerElement.classList.remove("hidden");
     state.isControllerVisible = true;
-    
+
     // Show cursor when controls are visible
     const videoAreaOverlay = document.getElementById("netflix-video-area-overlay");
     if (videoAreaOverlay) {
@@ -802,7 +1081,7 @@ function showController() {
         ) {
             state.controllerElement.classList.add("hidden");
             state.isControllerVisible = false;
-            
+
             // Hide cursor when controls are hidden
             if (videoAreaOverlay) {
                 videoAreaOverlay.style.cursor = "none";
@@ -1989,7 +2268,7 @@ function addMediaController() {
     const nextEpisodeButton = document.createElement("button");
     nextEpisodeButton.id = "netflix-next-episode";
     nextEpisodeButton.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="NextEpisodeStandard" aria-hidden="true"><path fill="white" d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>';
+        '<svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="NextEpisodeStandard" aria-hidden="true"><path fill="white" d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>';
 
     // grey out the next episode button (default)
     nextEpisodeButton.disabled = true;
@@ -2073,9 +2352,18 @@ function addMediaController() {
             volumeIcon.innerHTML = state.videoElement.muted
                 ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L9.91 6.09 12 8.18M4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.26c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.32 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9" fill="white"/></svg>'
                 : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77 0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3z" fill="white"/></svg>';
-        } else if(e.target === nextEpisodeButton || e.target.closest("#netflix-next-episode")) {
+        } else if (e.target === nextEpisodeButton || e.target.closest("#netflix-next-episode")) {
             // Trigger next episode action
             jumpToNextEpisode();
+        } else if (e.target === episodesButton || e.target.closest('#netflix-episodes-button')) {
+            // Toggle episodes list
+            const panel = document.getElementById('netflix-episodes-list');
+            if (panel) {
+                panel.remove();
+                state.episodesListOpen = false;
+            } else {
+                showEpisodesList();
+            }
         } else if (
             e.target === subtitleToggle ||
             e.target.closest("#netflix-subtitle-toggle")
@@ -2237,7 +2525,12 @@ function addMediaController() {
     controlsLeft.appendChild(volumeContainer);
     controlsLeft.appendChild(state.screenTime);
 
+    const episodesButton = document.createElement("button");
+    episodesButton.id = "netflix-episodes-button";
+    episodesButton.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H20V8H4V6M4 11H20V13H4V11M4 16H20V18H4V16Z" fill="white"/></svg>';
+
     controlsRight.appendChild(nextEpisodeButton);
+    controlsRight.appendChild(episodesButton);
     controlsRight.appendChild(bilingualToggle);
     controlsRight.appendChild(subtitleToggle);
     controlsRight.appendChild(state.buttonFullScreen);
@@ -2517,13 +2810,13 @@ function createBackButton() {
 }
 
 function getIdFromUrl() {
-  const url = window.location.href;
-  const parts = url.split('/');
-  const watchIndex = parts.indexOf('watch');
-  if (watchIndex !== -1 && watchIndex + 1 < parts.length) {
-    return parts[watchIndex + 1].split('?')[0];
-  }
-  return null;
+    const url = window.location.href;
+    const parts = url.split('/');
+    const watchIndex = parts.indexOf('watch');
+    if (watchIndex !== -1 && watchIndex + 1 < parts.length) {
+        return parts[watchIndex + 1].split('?')[0];
+    }
+    return null;
 }
 
 function getNextEpisodeId() {
@@ -2537,37 +2830,37 @@ function getNextEpisodeId() {
     return fetch(`https://www.netflix.com/nq/website/memberapi/release/metadata?movieid=${curEpisodeId}`, {
         credentials: "include", // Important: includes your session cookies
     })
-    .then(response => response.json())
-    .then(response => {
-        const episodes = response.video.seasons.reduce((acc, season) => {
-            if (season.episodes) {
-                acc.push(...season.episodes);
+        .then(response => response.json())
+        .then(response => {
+            const episodes = response.video.seasons.reduce((acc, season) => {
+                if (season.episodes) {
+                    acc.push(...season.episodes);
+                }
+                return acc;
+            }, []);
+
+            console.log("Current Episode ID: ", curEpisodeId);
+
+            // Find the index of the current episode
+            const curEpisodeIndex = episodes.findIndex(episode => episode.id.toString() === curEpisodeId);
+            if (curEpisodeIndex === -1) {
+                console.log("Current episode not found");
+                return null;
             }
-            return acc;
-        }, []);
 
-        console.log("Current Episode ID: ", curEpisodeId);
-
-        // Find the index of the current episode
-        const curEpisodeIndex = episodes.findIndex(episode => episode.id.toString() === curEpisodeId);
-        if (curEpisodeIndex === -1) {
-            console.log("Current episode not found");
+            // Get the next episode
+            const nextEpisode = episodes[curEpisodeIndex + 1] || null;
+            if (nextEpisode) {
+                return nextEpisode.id;
+            } else {
+                console.log("No next episode found");
+                return null;
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching metadata:", error);
             return null;
-        }
-
-        // Get the next episode
-        const nextEpisode = episodes[curEpisodeIndex + 1] || null;
-        if (nextEpisode) {
-            return nextEpisode.id;
-        } else {
-            console.log("No next episode found");
-            return null;
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching metadata:", error);
-        return null;
-    });
+        });
 }
 
 function jumpToNextEpisode() {
