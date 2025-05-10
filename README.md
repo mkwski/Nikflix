@@ -69,5 +69,7 @@ If you would like to improve the extension, feel free to submit a Pull Request o
 - 📌 [GitHub Profile](https://github.com/mrobeidat)
 - 👤 **@Ajexsen**
 - 📌 [GitHub Profile](https://github.com/Ajexsen)
+- 👤 **@mrobeidat**
+- 📌 [GitHub Profile](https://github.com/mrobeidat)
 
 **License** MIT License
