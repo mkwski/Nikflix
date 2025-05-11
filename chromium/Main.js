@@ -1555,7 +1555,7 @@ function doYourJob() {
             addMediaController();
             //get audio trackliste
             window.dispatchEvent(
-                new CustomEvent("GetAudioTracksList")
+                new CustomEvent("GetAudioTracksList"),
             );
             //get substitle trackliste
             window.dispatchEvent(

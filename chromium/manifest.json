@@ -8,7 +8,11 @@
   },
   "web_accessible_resources": [
     {
-        "resources": ["netflix-seeker.js"],
+        "resources": [
+          "netflix-seeker.js",
+          "netflix-audioChange.js",
+          "netflix-substitleChange.js"
+        ],
         "matches": ["*://*.netflix.com/*"]
     }
   ],
