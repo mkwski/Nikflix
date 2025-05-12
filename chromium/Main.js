@@ -1543,6 +1543,14 @@ function removeElementsByClasses(classesNames) {
  * Main function to initialize or cleanup the controller
  */
 function doYourJob() {
+    //get audio trackliste
+    window.dispatchEvent(
+        new CustomEvent("GetAudioTracksList"),
+    );
+    //get substitle trackliste
+    window.dispatchEvent(
+        new CustomEvent("GetSubtitleTracksList")
+    );
     if (isOnNetflixWatch()) {
         removeElementsByClasses(CLASSES_TO_REMOVE);
 
@@ -1553,14 +1561,6 @@ function doYourJob() {
 
         state.controllerTimerId = setTimeout(() => {
             addMediaController();
-            //get audio trackliste
-            window.dispatchEvent(
-                new CustomEvent("GetAudioTracksList"),
-            );
-            //get substitle trackliste
-            window.dispatchEvent(
-                new CustomEvent("GetSubtitleTracksList")
-            );
             state.controllerTimerId = null;
         }, CONTROLLER_INIT_DELAY);
     } else {

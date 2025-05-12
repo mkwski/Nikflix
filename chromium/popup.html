@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nikflix | Bypass the account-sharing restrictions</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 280px;
+            height: 360px;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f0f2f5, #e2e6ea);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            color: #222;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        header {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #111;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #5865F2;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            width: 200px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4752c4;
+            transform: translateY(-2px);
+        }
+
+        .marquee-container {
+            margin: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 12s linear infinite;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .marquee-text a {
+            color: #5865F2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .marquee-text a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes scroll-left {
+            from {
+                transform: translateX(0%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        footer {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>🎬 Nikflix</header>
+
+<main>
+    <button id="code-btn">📂 Check code on GitHub</button>
+    <button id="coffee-btn">☕ Buy me a coffee</button>
+    <button id="bug-btn">🐞 Report a bug</button>
+</main>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+        🙌 Thanks to Contributors :
+        <a href="https://github.com/bhhoang" target="_blank">@bhhoang</a> •
+        <a href="https://github.com/myanpetra99" target="_blank">@myanpetra99</a> •
+        <a href="https://github.com/IshaanM8" target="_blank">@IshaanM8</a> •
+        <a href="https://github.com/mrobeidat" target="_blank">@mrobeidat</a> •
+        <a href="https://github.com/Ajexsen" target="_blank">@Ajexsen</a>
+    </div>
+</div>
+
+<footer>Made with ❤️ • <span id="version"></span></footer>
+
+<script src="popup.js"></script>
+
+</body>
+</html>

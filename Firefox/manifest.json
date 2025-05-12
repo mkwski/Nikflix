@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Nikflix",
-  "version": "1.6",
+  "version": "1.6.1",
   "icons": {
     "48": "icons/Nikflix-48.png"
   },
@@ -10,6 +10,11 @@
     "webRequestBlocking",
     "<all_urls>"
   ],
+  "browser_action": {
+    "default_icon": "icons/Nikflix-48.png",
+    "default_popup": "popup.html",
+    "default_title": "Nikflix - Bypass the account-sharing restrictions"
+  },
   "content_scripts": [
     {
       "matches": [
