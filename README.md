@@ -54,9 +54,18 @@ If you like this project, consider giving it a star ⭐
 Using this extension may violate Netflix's terms of service. Use it at your own risk.
 
 ---
+# Changelog
+## [1.7.0] - 2025-05-19
+### Added
 
-**Contribute**
-If you would like to improve the extension, feel free to submit a Pull Request or report an issue in the GitHub repository's Issues section.
+- A button to restart the extension script in case of a bug.
+- A message is now displayed when changing subtitles or audio.
+### Fixed
+- Fixed the issue where the back button remained visible when the controller disappeared.
+
+
+
+
 
 ## Contributors
  - 👤 **@bhhoang**  
@@ -72,4 +81,6 @@ If you would like to improve the extension, feel free to submit a Pull Request o
 - 👤 **@mrobeidat**
 - 📌 [GitHub Profile](https://github.com/mrobeidat)
 
+**Contribute**
+If you would like to improve the extension, feel free to submit a Pull Request or report an issue in the GitHub repository's Issues section.
 **License** MIT License

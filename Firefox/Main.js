@@ -51,12 +51,11 @@ let state = {
   //Audio
   availableAudioTracks: [],
   audioLanguage:0,
-  // Translation state
-  lastTranslationRequest: 0,
-  translationDelay: 300, // ms between translation requests to avoid rate limiting
 
   // Episodes list state
-  episodesListOpen: false
+  episodesListOpen: false,
+
+
 };
 
 // Constants
@@ -403,6 +402,7 @@ function showController() {
   if (!state.controllerElement) return;
 
   state.controllerElement.classList.remove("hidden");
+  state.backButton.style.opacity = "1";
   state.isControllerVisible = true;
 
   // Show cursor when controls are visible
@@ -422,6 +422,7 @@ function showController() {
         !state.subtitleSettingsOpen
     ) {
       state.controllerElement.classList.add("hidden");
+      state.backButton.style.opacity = "0";
       state.isControllerVisible = false;
 
       // Hide cursor when controls are hidden
@@ -498,7 +499,7 @@ function createSubtitleSettings() {
             <span class="subtitle-settings-label">Subtitles Language</span>
             <div class="subtitle-settings-control">
                 <select id="subtitle-language-select" class="subtitle-select">
-                    ${generateSubtitleLanguageOptions(state.primaryLanguage)}
+                    ${generateSubtitleLanguageOptions(state.substitleLanguage)}
                 </select>
             </div>
         </div>
@@ -511,7 +512,6 @@ function createSubtitleSettings() {
       .querySelector("#subtitle-toggle-checkbox")
       .addEventListener("change", (e) => {
         state.subtitleEnabled = e.target.checked;
-        toggleSubtitles(state.subtitleEnabled);
       });
 
 
@@ -525,18 +525,21 @@ function createSubtitleSettings() {
         );
         setTimeout(() => {
           doYourJob()
+          showMessage(`Audio changed to ${state.availableAudioTracks[e.target.value].displayName} `, 2000);
         }, 500);
       });
 
   panel
       .querySelector("#subtitle-language-select")
       .addEventListener("change", (e) => {
-        state.availableSubtitleTracks = e.target.value;
+        state.substitleLanguage = e.target.value;
         window.dispatchEvent(
             new CustomEvent("netflixSubtitleChange", { detail: e.target.value })
         );
+        console.log("izan",state.availableSubtitleTracks[e.target.value].displayName)
         setTimeout(() => {
           doYourJob()
+          showMessage(`Subtitle changed to ${state.availableSubtitleTracks[e.target.value].displayName} `, 2000);
         }, 500);
       });
   return panel;
@@ -568,157 +571,6 @@ function generateSubtitleLanguageOptions(selectedLang) {
   }
   return optionsHTML;
 }
-
-/**
- * Toggle subtitles on/off
- * @param {boolean} enabled - Whether subtitles should be enabled
- */
-function toggleSubtitles(enabled) {
-  if (!state.videoElement) return;
-
-  // Find Netflix's subtitle menu
-  const subtitleMenu = document.querySelector(
-      '[data-uia="video-subtitle-picker-label"]'
-  );
-  if (!subtitleMenu) return;
-
-  try {
-    // Click to open subtitle menu
-    subtitleMenu.click();
-
-    // Select appropriate option
-    setTimeout(() => {
-      let targetOption;
-
-      if (enabled) {
-        // Find option for primary language
-        const options = Array.from(
-            document.querySelectorAll('[data-uia="track-list-item"]')
-        );
-
-        for (const option of options) {
-          const langCode =
-              option.getAttribute("data-lang") ||
-              option.getAttribute("data-language") ||
-              extractLanguageCode(option.textContent);
-
-          if (langCode === state.primaryLanguage) {
-            targetOption = option;
-            break;
-          }
-        }
-
-        // If no match found, select first non-off option
-        if (!targetOption) {
-          targetOption = options.find(
-              (opt) => !opt.textContent.includes("Off")
-          );
-        }
-      } else {
-        // Find "Off" option
-        targetOption = Array.from(
-            document.querySelectorAll('[data-uia="track-list-item"]')
-        ).find((opt) => opt.textContent.includes("Off"));
-      }
-
-      if (targetOption) {
-        targetOption.click();
-      }
-
-    }, 300);
-  } catch (error) {
-    console.error("Error toggling subtitles:", error);
-  }
-}
-
-
-
-
-/**
- * Disable bilingual subtitle display
- */
-function disableBilingualSubtitles() {
-  if (state.subtitleObserver) {
-    state.subtitleObserver.disconnect();
-    state.subtitleObserver = null;
-  }
-
-  if (state.subtitleContainer) {
-    state.subtitleContainer.removeAttribute("dual-subtitles");
-    state.subtitleContainer = null;
-  }
-
-  // Find subtitle elements and restore them
-  const subtitleElements = document.querySelectorAll(
-      ".player-timedtext-text-container"
-  );
-  subtitleElements.forEach((element) => {
-    // Remove dual subtitle formatting but keep original text
-    const originalText = element.textContent;
-    element.innerHTML = originalText;
-  });
-
-  showMessage("Bilingual Subtitles Disabled", 2000);
-}
-
-
-
-/**
- * Process a subtitle element to add secondary language
- * @param {HTMLElement} element - The subtitle element
- */
-async function processSubtitleElement(element) {
-  if (!element || !state.bilingualEnabled) return;
-
-  // Get primary subtitle text
-  const primaryText = element.textContent;
-
-  try {
-    // Rate limit translation requests
-    const now = Date.now();
-    const timeSinceLastRequest = now - state.lastTranslationRequest;
-
-    if (timeSinceLastRequest < state.translationDelay) {
-      await new Promise((resolve) =>
-          setTimeout(resolve, state.translationDelay - timeSinceLastRequest)
-      );
-    }
-
-    state.lastTranslationRequest = Date.now();
-
-    // Translate using Google Translate
-    const translation = await translateText(
-        primaryText,
-        state.primaryLanguage,
-        state.secondaryLanguage
-    );
-
-    // Replace content with dual-language format and add wrapper div for better centering
-    element.innerHTML = `
-            <div style="width:100%; text-align:center;">
-                <div class="primary-subtitle">${primaryText}</div>
-                <div class="secondary-subtitle">${translation}</div>
-            </div>
-        `;
-
-    // Ensure the element itself has proper styling
-    element.style.textAlign = "center";
-    element.style.width = "100%";
-    element.style.maxWidth = "100%";
-    element.style.left = "0";
-    element.style.right = "0";
-  } catch (error) {
-    console.error("Error processing subtitle:", error);
-    // In case of error, still show both but indicate translation failed
-    element.innerHTML = `
-            <div style="width:100%; text-align:center;">
-                <div class="primary-subtitle">${primaryText}</div>
-                <div class="secondary-subtitle">[Translation unavailable]</div>
-            </div>
-        `;
-  }
-}
-
 
 
 /**
@@ -846,7 +698,6 @@ function setupKeyboardShortcuts() {
       case "C":
         e.preventDefault();
         state.subtitleEnabled = !state.subtitleEnabled;
-        toggleSubtitles(state.subtitleEnabled);
         showMessage(state.subtitleEnabled ? "Subtitles On" : "Subtitles Off");
 
         // Update settings panel if open
@@ -867,7 +718,6 @@ function setupKeyboardShortcuts() {
           // Make sure subtitles are enabled first
           if (!state.subtitleEnabled) {
             state.subtitleEnabled = true;
-            toggleSubtitles(true);
             // Update settings panel if open
             if (state.subtitleSettingsPanel) {
               state.subtitleSettingsPanel.querySelector(
@@ -875,10 +725,7 @@ function setupKeyboardShortcuts() {
               ).checked = true;
             }
           }
-        } else {
-          disableBilingualSubtitles();
         }
-
         // Update settings panel if open
         if (state.subtitleSettingsPanel) {
           state.subtitleSettingsPanel.querySelector(
@@ -919,127 +766,8 @@ function setupKeyboardShortcuts() {
   }
 }
 
-function createSeekControls() {
-  // Only add seek controls if they don't exist yet
-  if (document.getElementById("netflix-seek-controls")) return;
 
-  const seekControls = document.createElement("div");
-  seekControls.id = "netflix-seek-controls";
-  seekControls.style.position = "fixed";
-  seekControls.style.bottom = "100px";
-  seekControls.style.left = "50%";
-  seekControls.style.transform = "translateX(-50%)";
-  seekControls.style.display = "flex";
-  seekControls.style.alignItems = "center";
-  seekControls.style.gap = "10px";
-  seekControls.style.zIndex = "10001";
-  seekControls.style.opacity = "0";
-  seekControls.style.transition = "opacity 0.3s ease";
 
-  // Rewind button
-  const rewindBtn = document.createElement("button");
-  rewindBtn.textContent = "-10s";
-  rewindBtn.style.backgroundColor = "rgba(0,0,0,0.7)";
-  rewindBtn.style.color = "white";
-  rewindBtn.style.border = "none";
-  rewindBtn.style.borderRadius = "4px";
-  rewindBtn.style.padding = "8px 12px";
-  rewindBtn.style.cursor = "pointer";
-
-  // Forward button
-  const forwardBtn = document.createElement("button");
-  forwardBtn.textContent = "+10s";
-  forwardBtn.style.backgroundColor = "rgba(0,0,0,0.7)";
-  forwardBtn.style.color = "white";
-  forwardBtn.style.border = "none";
-  forwardBtn.style.borderRadius = "4px";
-  forwardBtn.style.padding = "8px 12px";
-  forwardBtn.style.cursor = "pointer";
-
-  // Add events
-  rewindBtn.addEventListener("click", () => {
-    // Simulate left arrow key press on Netflix player
-    const video = document.querySelector("video");
-    if (video) {
-      const event = new KeyboardEvent("keydown", {
-        key: "ArrowLeft",
-        code: "ArrowLeft",
-        keyCode: 37,
-        which: 37,
-        bubbles: true,
-      });
-      video.dispatchEvent(event);
-    }
-  });
-
-  forwardBtn.addEventListener("click", () => {
-    // Simulate right arrow key press on Netflix player
-    const video = document.querySelector("video");
-    if (video) {
-      const event = new KeyboardEvent("keydown", {
-        key: "ArrowRight",
-        code: "ArrowRight",
-        keyCode: 39,
-        which: 39,
-        bubbles: true,
-      });
-      video.dispatchEvent(event);
-    }
-  });
-
-  seekControls.appendChild(rewindBtn);
-  seekControls.appendChild(forwardBtn);
-
-  document.body.appendChild(seekControls);
-
-  // Show seek controls when controller is visible
-  const showSeekControls = () => {
-    if (state.isControllerVisible) {
-      seekControls.style.opacity = "1";
-    } else {
-      seekControls.style.opacity = "0";
-    }
-  };
-
-  // Connect to controller visibility
-  const controllerObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === "class") {
-        showSeekControls();
-      }
-    });
-  });
-
-  if (state.controllerElement) {
-    controllerObserver.observe(state.controllerElement, { attributes: true });
-  }
-
-  return seekControls;
-}
-
-/**
- * Add to addMediaController function to include seek controls
- */
-function setupSeekingSupport() {
-  // Create on-screen seek controls
-  createSeekControls();
-
-  // Also make sure our progress bar is always synced with Netflix's playback
-  const videoElement = document.querySelector("video");
-  if (videoElement) {
-    videoElement.addEventListener("timeupdate", () => {
-      requestAnimationFrame(updateProgression);
-    });
-
-    videoElement.addEventListener("seeking", () => {
-      requestAnimationFrame(updateProgression);
-    });
-
-    videoElement.addEventListener("seeked", () => {
-      requestAnimationFrame(updateProgression);
-    });
-  }
-}
 
 /**
  * Find the Netflix player element and send keyboard events to it
@@ -1258,11 +986,11 @@ function addMediaController() {
   subtitleToggle.innerHTML =
       '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20,4H4C2.9,4 2,4.9 2,6V18C2,19.1 2.9,20 4,20H20C21.1,20 22,19.1 22,18V6C22,4.9 21.1,4 20,4M20,18H4V6H20V18M6,10H8V12H6V10M6,14H14V16H6V14M16,14H18V16H16V14M10,10H18V12H10Z" fill="white"/></svg>';
 
-  // Bilingual subtitle toggle button
-  const bilingualToggle = document.createElement("button");
-  bilingualToggle.id = "netflix-bilingual-toggle";
-  bilingualToggle.innerHTML =
-      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07M18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10M15.88 17L17.5 12.67L19.12 17H15.88Z" fill="white"/></svg>';
+  // remove toggle button , to use if you have a bug
+  const removeToggle = document.createElement("button");
+  removeToggle.id = "netflix-remove-toggle";
+  removeToggle.innerHTML =
+     '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V13C12.75 13.4142 12.4142 13.75 12 13.75C11.5858 13.75 11.25 13.4142 11.25 13V8C11.25 7.58579 11.5858 7.25 12 7.25Z" fill="#ffffff"></path> <path d="M12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M8.2944 4.47643C9.36631 3.11493 10.5018 2.25 12 2.25C13.4981 2.25 14.6336 3.11493 15.7056 4.47643C16.7598 5.81544 17.8769 7.79622 19.3063 10.3305L19.7418 11.1027C20.9234 13.1976 21.8566 14.8523 22.3468 16.1804C22.8478 17.5376 22.9668 18.7699 22.209 19.8569C21.4736 20.9118 20.2466 21.3434 18.6991 21.5471C17.1576 21.75 15.0845 21.75 12.4248 21.75H11.5752C8.91552 21.75 6.84239 21.75 5.30082 21.5471C3.75331 21.3434 2.52637 20.9118 1.79099 19.8569C1.03318 18.7699 1.15218 17.5376 1.65314 16.1804C2.14334 14.8523 3.07658 13.1977 4.25818 11.1027L4.69361 10.3307C6.123 7.79629 7.24019 5.81547 8.2944 4.47643ZM9.47297 5.40432C8.49896 6.64148 7.43704 8.51988 5.96495 11.1299L5.60129 11.7747C4.37507 13.9488 3.50368 15.4986 3.06034 16.6998C2.6227 17.8855 2.68338 18.5141 3.02148 18.9991C3.38202 19.5163 4.05873 19.8706 5.49659 20.0599C6.92858 20.2484 8.9026 20.25 11.6363 20.25H12.3636C15.0974 20.25 17.0714 20.2484 18.5034 20.0599C19.9412 19.8706 20.6179 19.5163 20.9785 18.9991C21.3166 18.5141 21.3773 17.8855 20.9396 16.6998C20.4963 15.4986 19.6249 13.9488 18.3987 11.7747L18.035 11.1299C16.5629 8.51987 15.501 6.64148 14.527 5.40431C13.562 4.17865 12.8126 3.75 12 3.75C11.1874 3.75 10.4379 4.17865 9.47297 5.40432Z" fill="#ffffff"></path> </g></svg>'
 
   const barreContainer = document.createElement("div");
   barreContainer.id = "netflix-barre-container";
@@ -1299,6 +1027,7 @@ function addMediaController() {
     ) {
       if (state.videoElement.paused) {
         state.videoElement.play();
+        doYourJob();
         state.buttonPlayPause.innerHTML =
             '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 19H18V5H14V19ZM6 19H10V5H6V19Z" fill="white"/></svg>';
       } else {
@@ -1337,6 +1066,12 @@ function addMediaController() {
     ) {
       // Toggle subtitle settings panel
       toggleSubtitleSettings();
+    }else if (
+        e.target === removeToggle ||
+        e.target.closest("#netflix-remove-toggle")
+    ){
+      doYourJob()
+      showMessage("bypassed successfully")
     }
   };
 
@@ -1466,7 +1201,7 @@ function addMediaController() {
 
   controlsRight.appendChild(nextEpisodeButton);
   controlsRight.appendChild(episodesButton);
-  controlsRight.appendChild(bilingualToggle);
+  controlsRight.appendChild(removeToggle);
   controlsRight.appendChild(subtitleToggle);
   controlsRight.appendChild(state.buttonFullScreen);
 
@@ -1513,13 +1248,6 @@ function addMediaController() {
   state.subtitleSettingsPanel = createSubtitleSettings();
 
   // If subtitles were previously enabled, re-enable them
-  if (state.subtitleEnabled) {
-    // Short delay to allow Netflix to initialize
-    setTimeout(() => {
-      toggleSubtitles(true);
-    }, 1000);
-  }
-
   // Create and add back button
   createBackButton();
 }
@@ -1645,7 +1373,7 @@ function createBackButton() {
   state.backButton.style.alignItems = "center";
   state.backButton.style.justifyContent = "center";
   state.backButton.style.transition = "all 0.2s ease, opacity 0.3s ease";
-  state.backButton.style.opacity = "0"; // Start hidden and fade in
+  state.backButton.style.opacity="0"
 
   // Add hover effect
   state.backButton.addEventListener("mouseover", () => {
@@ -1708,25 +1436,11 @@ function createBackButton() {
 
   document.body.appendChild(state.backButton);
 
-  // Fade in after a small delay
-  setTimeout(() => {
-    state.backButton.style.opacity = "1";
-  }, 300);
-
-  // Show/hide with controller visibility
-  const updateBackButtonVisibility = () => {
-    if (state.isControllerVisible) {
-      state.backButton.style.opacity = "1";
-    } else {
-      state.backButton.style.opacity = "0";
-    }
-  };
 
   // Connect to controller visibility changes
   const originalShowController = showController;
   showController = function () {
     originalShowController();
-    updateBackButtonVisibility();
   };
 
   // Handle controller hide timer completion
@@ -1741,7 +1455,7 @@ function createBackButton() {
       ) {
         state.controllerElement.classList.add("hidden");
         state.isControllerVisible = false;
-        updateBackButtonVisibility();
+        state.backButton.style.opacity = "0";
       }
     }, CONTROLLER_HIDE_DELAY);
   }

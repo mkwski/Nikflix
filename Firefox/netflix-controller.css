@@ -99,10 +99,10 @@
 #netflix-plein-ecran,
 #netflix-next-episode,
 #netflix-subtitle-toggle,
-#netflix-bilingual-toggle {
+#netflix-remove-toggle {
     background-color: transparent;
     border: none;
-    color: white;
+    color: transparent;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -117,7 +117,7 @@
 #netflix-play-pause:hover,
 #netflix-plein-ecran:hover,
 #netflix-subtitle-toggle:hover,
-#netflix-bilingual-toggle:hover {
+#netflix-remove-toggle:hover {
     background-color: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
 }
@@ -125,7 +125,7 @@
 #netflix-play-pause:active,
 #netflix-plein-ecran:active,
 #netflix-subtitle-toggle:active,
-#netflix-bilingual-toggle:active {
+#netflix-remove-toggle:active {
     transform: scale(0.95);
 }
 
