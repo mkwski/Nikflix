@@ -3,58 +3,28 @@
 An extension that allows bypassing Netflix's password-sharing restrictions.
 If you like this project, consider giving it a star ⭐
 
-## Installation on Firefox Browser
 
-[![Download on Firefox](https://img.shields.io/badge/Download-Firefox-orange?logo=firefox)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
-
-## Installation on Chrome, Edge, Brave , or any other Chromium-based browser
+## 📥 Installation on Chrome, Edge, Brave , or any other Chromium-based browser (![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/knjoabokknkpkhbbdclmnjcoeedmgema))
 
 [![Download on Chrome](https://img.shields.io/badge/Download-Chrome-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/nikflix/knjoabokknkpkhbbdclmnjcoeedmgema?hl=en-GB&authuser=0)
+![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/knjoabokknkpkhbbdclmnjcoeedmgema)
+![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/knjoabokknkpkhbbdclmnjcoeedmgema)
 
-## Installation on Chromium Browsers (Developer Mode)
+## 📥 Installation on Firefox Browser(![Mozilla Add-on Version](https://img.shields.io/amo/v/nikflix))
 
-### Prerequisites
+[![Download on Firefox](https://img.shields.io/badge/Download-Firefox-orange?logo=firefox)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
+![Mozilla Add-on Stars](https://img.shields.io/amo/stars/nikflix)
+![Mozilla Add-on Users](https://img.shields.io/amo/users/nikflix)
 
-- Google Chrome, Microsoft Edge, or any other Chromium-based browser
-- Enable developer mode in the browser
+----
 
-### Installation Steps
-
-1. **Download the Project**
-
-    - Clone the GitHub repository:
-      ```bash
-      git clone https://github.com/YidirK/Nikflix.git
-      ```
-    - Or download the project as a ZIP file and extract it on your computer.
-
-2. **Open the Extensions Page**
-
-    - Go to `chrome://extensions/` in your browser.
-    - Enable "Developer mode" (toggle at the top right of the page).
-
-3. **Load the Extension**
-
-    - Click the "Load unpacked" button.
-    - Select the folder containing the downloaded extension files.
-    - The extension should now appear in the list of installed extensions.
-
-4. **Verify the Installation**
-
-    - Ensure the extension is enabled.
-    - Log in to Netflix and test if the sharing restrictions are bypassed.
-
-## Features
+## ✨ Features
 
 - Bypasses Netflix account-sharing restrictions
 - Works directly in the browser with no complex configuration
+-  Get Around the Netflix Password-Sharing Ban (Netflix household).
 
-## Disclaimer
-
-Using this extension may violate Netflix's terms of service. Use it at your own risk.
-
----
-# Changelog
+# 📝 Changelog
 ## [1.7.0] - 2025-05-19
 ### Added
 
@@ -64,23 +34,22 @@ Using this extension may violate Netflix's terms of service. Use it at your own 
 - Fixed the issue where the back button remained visible when the controller disappeared.
 
 
+## 👥 Contributors
+<a href="https://github.com/YidirK/Nikflix/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=YidirK/Nikflix" />
+</a>  
 
+##  🤝 Contributing
+Contributions are welcome! Feel free to submit a Pull Request or report an issue.
 
+## ⚠️ Disclaimer
 
-## Contributors
- - 👤 **@bhhoang**  
-📌 [GitHub Profile](https://github.com/bhhoang)
-- 👤 **@myanpetra99**
-- 📌 [GitHub Profile](https://github.com/myanpetra99)
-- 👤 **@IshaanM8**
-- 📌 [GitHub Profile](https://github.com/IshaanM8)
-- 👤 **@mrobeidat**
-- 📌 [GitHub Profile](https://github.com/mrobeidat)
-- 👤 **@Ajexsen**
-- 📌 [GitHub Profile](https://github.com/Ajexsen)
-- 👤 **@mrobeidat**
-- 📌 [GitHub Profile](https://github.com/mrobeidat)
+This extension may violate Netflix's terms of service. Use at your own risk.
 
-**Contribute**
-If you would like to improve the extension, feel free to submit a Pull Request or report an issue in the GitHub repository's Issues section.
-**License** MIT License
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+### ⭐ If you find this extension helpful, please consider giving it a star! ⭐
