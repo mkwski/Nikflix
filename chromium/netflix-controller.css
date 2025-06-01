@@ -694,7 +694,7 @@ input:checked + .subtitle-toggle-slider:before {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-right: 23px;
     cursor: pointer;
     display: flex;
     align-items: center;

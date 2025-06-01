@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/3000-users.png" alt="3000 users" width="600"/>
+</p>
+
 # Netflix Password-Sharing (household) Bypass Extension
 
 An extension that allows bypassing Netflix's password-sharing restrictions.
@@ -25,11 +29,13 @@ If you like this project, consider giving it a star ⭐
 -  Get Around the Netflix Password-Sharing Ban (Netflix household).
 
 # 📝 Changelog
-## [1.7.0] - 2025-05-19
+## [1.8.0] - 2025-06-01
+Thanks to [@vinodhelambe](https://github.com/vinodhelambe)
 ### Added
+- 🔘 New Button: netflix-speed-toggle added to the right control section.
+- 🔁 Speed Cycle: Cycles through playback speeds:
+  1x → 1.25x → 1.5x → 1.75x → 2x → 1x ...
 
-- A button to restart the extension script in case of a bug.
-- A message is now displayed when changing subtitles or audio.
 ### Fixed
 - Fixed the issue where the back button remained visible when the controller disappeared.
 

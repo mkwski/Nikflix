@@ -35,7 +35,7 @@ let state = {
   primarySubtitleTrack: null,
   secondarySubtitleTrack: null,
   availableSubtitleTracks: [],
-  substitleLanguage:0,
+  substitleLanguage: 0,
   subtitleObserver: null,
   subtitleContainer: null,
   subtitleSettingsOpen: false,
@@ -50,7 +50,7 @@ let state = {
 
   //Audio
   availableAudioTracks: [],
-  audioLanguage:0,
+  audioLanguage: 0,
 
   // Episodes list state
   episodesListOpen: false,
@@ -519,7 +519,7 @@ function createSubtitleSettings() {
       .querySelector("#audio-language-select")
       .addEventListener("change", (e) => {
         state.audioLanguage = e.target.value;
-        console.log("e",e.target.value)
+        console.log("e", e.target.value)
         window.dispatchEvent(
             new CustomEvent("netflixAudioChange", { detail: e.target.value })
         );
@@ -536,7 +536,7 @@ function createSubtitleSettings() {
         window.dispatchEvent(
             new CustomEvent("netflixSubtitleChange", { detail: e.target.value })
         );
-        console.log("izan",state.availableSubtitleTracks[e.target.value].displayName)
+        console.log("izan", state.availableSubtitleTracks[e.target.value].displayName)
         setTimeout(() => {
           doYourJob()
           showMessage(`Subtitle changed to ${state.availableSubtitleTracks[e.target.value].displayName} `, 2000);
@@ -552,8 +552,8 @@ function createSubtitleSettings() {
  */
 function generateAudioLanguageOptions(selectedLang) {
   let optionsHTML = "";
-  if( state.availableAudioTracks.length > 0 ){
-    state.availableAudioTracks.forEach((track , index) => {
+  if (state.availableAudioTracks.length > 0) {
+    state.availableAudioTracks.forEach((track, index) => {
       const isSelected = track.key === selectedLang ? "selected" : "";
       optionsHTML += `<option value="${index}" ${isSelected}>${track.displayName}</option>`;
     });
@@ -563,8 +563,8 @@ function generateAudioLanguageOptions(selectedLang) {
 function generateSubtitleLanguageOptions(selectedLang) {
   let optionsHTML = "";
 
-  if( state.availableSubtitleTracks.length > 0 ){
-    state.availableSubtitleTracks.forEach((track , index) => {
+  if (state.availableSubtitleTracks.length > 0) {
+    state.availableSubtitleTracks.forEach((track, index) => {
       const isSelected = track.key === selectedLang ? "selected" : "";
       optionsHTML += `<option value="${index}" ${isSelected}>${track.displayName}</option>`;
     });
@@ -990,7 +990,7 @@ function addMediaController() {
   const removeToggle = document.createElement("button");
   removeToggle.id = "netflix-remove-toggle";
   removeToggle.innerHTML =
-     '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V13C12.75 13.4142 12.4142 13.75 12 13.75C11.5858 13.75 11.25 13.4142 11.25 13V8C11.25 7.58579 11.5858 7.25 12 7.25Z" fill="#ffffff"></path> <path d="M12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M8.2944 4.47643C9.36631 3.11493 10.5018 2.25 12 2.25C13.4981 2.25 14.6336 3.11493 15.7056 4.47643C16.7598 5.81544 17.8769 7.79622 19.3063 10.3305L19.7418 11.1027C20.9234 13.1976 21.8566 14.8523 22.3468 16.1804C22.8478 17.5376 22.9668 18.7699 22.209 19.8569C21.4736 20.9118 20.2466 21.3434 18.6991 21.5471C17.1576 21.75 15.0845 21.75 12.4248 21.75H11.5752C8.91552 21.75 6.84239 21.75 5.30082 21.5471C3.75331 21.3434 2.52637 20.9118 1.79099 19.8569C1.03318 18.7699 1.15218 17.5376 1.65314 16.1804C2.14334 14.8523 3.07658 13.1977 4.25818 11.1027L4.69361 10.3307C6.123 7.79629 7.24019 5.81547 8.2944 4.47643ZM9.47297 5.40432C8.49896 6.64148 7.43704 8.51988 5.96495 11.1299L5.60129 11.7747C4.37507 13.9488 3.50368 15.4986 3.06034 16.6998C2.6227 17.8855 2.68338 18.5141 3.02148 18.9991C3.38202 19.5163 4.05873 19.8706 5.49659 20.0599C6.92858 20.2484 8.9026 20.25 11.6363 20.25H12.3636C15.0974 20.25 17.0714 20.2484 18.5034 20.0599C19.9412 19.8706 20.6179 19.5163 20.9785 18.9991C21.3166 18.5141 21.3773 17.8855 20.9396 16.6998C20.4963 15.4986 19.6249 13.9488 18.3987 11.7747L18.035 11.1299C16.5629 8.51987 15.501 6.64148 14.527 5.40431C13.562 4.17865 12.8126 3.75 12 3.75C11.1874 3.75 10.4379 4.17865 9.47297 5.40432Z" fill="#ffffff"></path> </g></svg>'
+      '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 7.25C12.4142 7.25 12.75 7.58579 12.75 8V13C12.75 13.4142 12.4142 13.75 12 13.75C11.5858 13.75 11.25 13.4142 11.25 13V8C11.25 7.58579 11.5858 7.25 12 7.25Z" fill="#ffffff"></path> <path d="M12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M8.2944 4.47643C9.36631 3.11493 10.5018 2.25 12 2.25C13.4981 2.25 14.6336 3.11493 15.7056 4.47643C16.7598 5.81544 17.8769 7.79622 19.3063 10.3305L19.7418 11.1027C20.9234 13.1976 21.8566 14.8523 22.3468 16.1804C22.8478 17.5376 22.9668 18.7699 22.209 19.8569C21.4736 20.9118 20.2466 21.3434 18.6991 21.5471C17.1576 21.75 15.0845 21.75 12.4248 21.75H11.5752C8.91552 21.75 6.84239 21.75 5.30082 21.5471C3.75331 21.3434 2.52637 20.9118 1.79099 19.8569C1.03318 18.7699 1.15218 17.5376 1.65314 16.1804C2.14334 14.8523 3.07658 13.1977 4.25818 11.1027L4.69361 10.3307C6.123 7.79629 7.24019 5.81547 8.2944 4.47643ZM9.47297 5.40432C8.49896 6.64148 7.43704 8.51988 5.96495 11.1299L5.60129 11.7747C4.37507 13.9488 3.50368 15.4986 3.06034 16.6998C2.6227 17.8855 2.68338 18.5141 3.02148 18.9991C3.38202 19.5163 4.05873 19.8706 5.49659 20.0599C6.92858 20.2484 8.9026 20.25 11.6363 20.25H12.3636C15.0974 20.25 17.0714 20.2484 18.5034 20.0599C19.9412 19.8706 20.6179 19.5163 20.9785 18.9991C21.3166 18.5141 21.3773 17.8855 20.9396 16.6998C20.4963 15.4986 19.6249 13.9488 18.3987 11.7747L18.035 11.1299C16.5629 8.51987 15.501 6.64148 14.527 5.40431C13.562 4.17865 12.8126 3.75 12 3.75C11.1874 3.75 10.4379 4.17865 9.47297 5.40432Z" fill="#ffffff"></path> </g></svg>'
 
   const barreContainer = document.createElement("div");
   barreContainer.id = "netflix-barre-container";
@@ -1066,10 +1066,10 @@ function addMediaController() {
     ) {
       // Toggle subtitle settings panel
       toggleSubtitleSettings();
-    }else if (
+    } else if (
         e.target === removeToggle ||
         e.target.closest("#netflix-remove-toggle")
-    ){
+    ) {
       doYourJob()
       showMessage("bypassed successfully")
     }
@@ -1090,10 +1090,37 @@ function addMediaController() {
   document.addEventListener("fullscreenchange", () => {
     if (state.buttonFullScreen) {
       state.buttonFullScreen.innerHTML = document.fullscreenElement
-          ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 3.41L16.41 9L18 10.59L23.59 5L22 3.41M2 5L7.59 10.59L9.18 9L3.59 3.41L2 5M18 13.41L16.41 15L22 20.59L23.59 19L18 13.41M9.18 15L7.59 13.41L2 19L3.59 20.59L9.18 15Z" fill="white"/></svg>'
-          : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
+          ? '<svg width="24" height="24"  viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="ic_fluent_full_screen_zoom_24_filled" fill="#ffffff" fill-rule="nonzero"> <path d="M20,15 C20.5522847,15 21,15.4477153 21,16 C21,16.5522847 20.5522847,17 20,17 L17,17 L17,20 C17,20.5522847 16.5522847,21 16,21 C15.4477153,21 15,20.5522847 15,20 L15,16 C15,15.4477153 15.4477153,15 16,15 L20,15 Z M4,15 L8,15 C8.51283584,15 8.93550716,15.3860402 8.99327227,15.8833789 L9,16 L9,20 C9,20.5522847 8.55228475,21 8,21 C7.48716416,21 7.06449284,20.6139598 7.00672773,20.1166211 L7,20 L7,17 L4,17 C3.44771525,17 3,16.5522847 3,16 C3,15.4871642 3.38604019,15.0644928 3.88337887,15.0067277 L4,15 L8,15 L4,15 Z M16,3 C16.5128358,3 16.9355072,3.38604019 16.9932723,3.88337887 L17,4 L17,7 L20,7 C20.5522847,7 21,7.44771525 21,8 C21,8.51283584 20.6139598,8.93550716 20.1166211,8.99327227 L20,9 L16,9 C15.4871642,9 15.0644928,8.61395981 15.0067277,8.11662113 L15,8 L15,4 C15,3.44771525 15.4477153,3 16,3 Z M8,3 C8.55228475,3 9,3.44771525 9,4 L9,8 C9,8.55228475 8.55228475,9 8,9 L4,9 C3.44771525,9 3,8.55228475 3,8 C3,7.44771525 3.44771525,7 4,7 L7,7 L7,4 C7,3.44771525 7.44771525,3 8,3 Z" id="🎨-Color"> </path> </g> </g> </g></svg>'
+          : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M9.94358 1.25L10 1.25C10.4142 1.25 10.75 1.58579 10.75 2C10.75 2.41421 10.4142 2.75 10 2.75C8.09318 2.75 6.73851 2.75159 5.71085 2.88976C4.70476 3.02502 4.12511 3.27869 3.7019 3.7019C3.27869 4.12511 3.02502 4.70476 2.88976 5.71085C2.75159 6.73851 2.75 8.09318 2.75 10C2.75 10.4142 2.41421 10.75 2 10.75C1.58579 10.75 1.25 10.4142 1.25 10L1.25 9.94358C1.24998 8.10582 1.24997 6.65019 1.40314 5.51098C1.56076 4.33856 1.89288 3.38961 2.64124 2.64124C3.38961 1.89288 4.33856 1.56076 5.51098 1.40314C6.65019 1.24997 8.10582 1.24998 9.94358 1.25ZM18.2892 2.88976C17.2615 2.75159 15.9068 2.75 14 2.75C13.5858 2.75 13.25 2.41421 13.25 2C13.25 1.58579 13.5858 1.25 14 1.25L14.0564 1.25C15.8942 1.24998 17.3498 1.24997 18.489 1.40314C19.6614 1.56076 20.6104 1.89288 21.3588 2.64124C22.1071 3.38961 22.4392 4.33856 22.5969 5.51098C22.75 6.65019 22.75 8.10583 22.75 9.94359V10C22.75 10.4142 22.4142 10.75 22 10.75C21.5858 10.75 21.25 10.4142 21.25 10C21.25 8.09318 21.2484 6.73851 21.1102 5.71085C20.975 4.70476 20.7213 4.12511 20.2981 3.7019C19.8749 3.27869 19.2952 3.02502 18.2892 2.88976ZM2 13.25C2.41421 13.25 2.75 13.5858 2.75 14C2.75 15.9068 2.75159 17.2615 2.88976 18.2892C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25C10.4142 21.25 10.75 21.5858 10.75 22C10.75 22.4142 10.4142 22.75 10 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3588C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564L1.25 14C1.25 13.5858 1.58579 13.25 2 13.25ZM22 13.25C22.4142 13.25 22.75 13.5858 22.75 14V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3588C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H14C13.5858 22.75 13.25 22.4142 13.25 22C13.25 21.5858 13.5858 21.25 14 21.25C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2892C21.2484 17.2615 21.25 15.9068 21.25 14C21.25 13.5858 21.5858 13.25 22 13.25Z" fill="#ffffff"></path> </g></svg>' ;
     }
   });
+
+  // === Speed toggle button ===
+  const speedToggleButton = document.createElement("button");
+  speedToggleButton.id = "netflix-speed-toggle";
+  speedToggleButton.title = "Speed: 1x";
+  speedToggleButton.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="InternetSpeedStandard" aria-hidden="true">
+<path fill="currentColor" d="M19.0569 6.27006C15.1546 2.20629 8.84535 2.20629 4.94312 6.27006C1.01896 10.3567 1.01896 16.9985 4.94312 21.0852L3.50053 22.4704C-1.16684 17.6098 -1.16684 9.7454 3.50053 4.88481C8.18984 0.0013696 15.8102 0.0013696 20.4995 4.88481C25.1668 9.7454 25.1668 17.6098 20.4995 22.4704L19.0569 21.0852C22.981 16.9985 22.981 10.3567 19.0569 6.27006ZM15 14.0001C15 15.6569 13.6569 17.0001 12 17.0001C10.3431 17.0001 9 15.6569 9 14.0001C9 12.3432 10.3431 11.0001 12 11.0001C12.4632 11.0001 12.9018 11.105 13.2934 11.2924L16.2929 8.29296L17.7071 9.70717L14.7076 12.7067C14.895 13.0983 15 13.5369 15 14.0001Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+</svg>
+`;
+
+  let speedOptions = [1, 1.25, 1.5, 1.75, 2];
+  let currentSpeedIndex = 0;
+
+  speedToggleButton.addEventListener("click", () => {
+    currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
+    if (state.videoElement) {
+      state.videoElement.playbackRate = speedOptions[currentSpeedIndex];
+      speedToggleButton.title = `Speed: ${speedOptions[currentSpeedIndex]}x`;
+      showMessage(`Speed: ${speedOptions[currentSpeedIndex]}x`);
+    }
+  });
+
+  // Append to right controls bar
+  controlsRight.appendChild(speedToggleButton);
+
+  // === End of Video Speed Control Integration ===
 
   state.videoElement.addEventListener("play", () => {
     if (state.buttonPlayPause)
@@ -1204,6 +1231,8 @@ function addMediaController() {
   controlsRight.appendChild(removeToggle);
   controlsRight.appendChild(subtitleToggle);
   controlsRight.appendChild(state.buttonFullScreen);
+  controlsRight.appendChild(speedToggleButton);
+
 
   state.controllerElement.appendChild(controlsLeft);
   state.controllerElement.appendChild(progressContainer);
@@ -1373,7 +1402,7 @@ function createBackButton() {
   state.backButton.style.alignItems = "center";
   state.backButton.style.justifyContent = "center";
   state.backButton.style.transition = "all 0.2s ease, opacity 0.3s ease";
-  state.backButton.style.opacity="0"
+  state.backButton.style.opacity = "0"
 
   // Add hover effect
   state.backButton.addEventListener("mouseover", () => {
