@@ -35,7 +35,7 @@ let state = {
     primarySubtitleTrack: null,
     secondarySubtitleTrack: null,
     availableSubtitleTracks: [],
-    substitleLanguage:0,
+    substitleLanguage: 0,
     subtitleObserver: null,
     subtitleContainer: null,
     subtitleSettingsOpen: false,
@@ -50,7 +50,7 @@ let state = {
 
     //Audio
     availableAudioTracks: [],
-    audioLanguage:0,
+    audioLanguage: 0,
 
     // Episodes list state
     episodesListOpen: false,
@@ -478,7 +478,7 @@ function createSubtitleSettings() {
             <div class="subtitle-settings-control">
                 <label class="subtitle-toggle-switch">
                     <input type="checkbox" id="subtitle-toggle-checkbox" ${state.subtitleEnabled ? "checked" : ""
-    }>
+        }>
                     <span class="subtitle-toggle-slider"></span>
                 </label>
             </div>
@@ -519,7 +519,7 @@ function createSubtitleSettings() {
         .querySelector("#audio-language-select")
         .addEventListener("change", (e) => {
             state.audioLanguage = e.target.value;
-            console.log("e",e.target.value)
+            console.log("e", e.target.value)
             window.dispatchEvent(
                 new CustomEvent("netflixAudioChange", { detail: e.target.value })
             );
@@ -536,7 +536,7 @@ function createSubtitleSettings() {
             window.dispatchEvent(
                 new CustomEvent("netflixSubtitleChange", { detail: e.target.value })
             );
-            console.log("izan",state.availableSubtitleTracks[e.target.value].displayName)
+            console.log("izan", state.availableSubtitleTracks[e.target.value].displayName)
             setTimeout(() => {
                 doYourJob()
                 showMessage(`Subtitle changed to ${state.availableSubtitleTracks[e.target.value].displayName} `, 2000);
@@ -552,8 +552,8 @@ function createSubtitleSettings() {
  */
 function generateAudioLanguageOptions(selectedLang) {
     let optionsHTML = "";
-    if( state.availableAudioTracks.length > 0 ){
-        state.availableAudioTracks.forEach((track , index) => {
+    if (state.availableAudioTracks.length > 0) {
+        state.availableAudioTracks.forEach((track, index) => {
             const isSelected = track.key === selectedLang ? "selected" : "";
             optionsHTML += `<option value="${index}" ${isSelected}>${track.displayName}</option>`;
         });
@@ -563,8 +563,8 @@ function generateAudioLanguageOptions(selectedLang) {
 function generateSubtitleLanguageOptions(selectedLang) {
     let optionsHTML = "";
 
-    if( state.availableSubtitleTracks.length > 0 ){
-        state.availableSubtitleTracks.forEach((track , index) => {
+    if (state.availableSubtitleTracks.length > 0) {
+        state.availableSubtitleTracks.forEach((track, index) => {
             const isSelected = track.key === selectedLang ? "selected" : "";
             optionsHTML += `<option value="${index}" ${isSelected}>${track.displayName}</option>`;
         });
@@ -1066,10 +1066,10 @@ function addMediaController() {
         ) {
             // Toggle subtitle settings panel
             toggleSubtitleSettings();
-        }else if (
+        } else if (
             e.target === removeToggle ||
             e.target.closest("#netflix-remove-toggle")
-        ){
+        ) {
             doYourJob()
             showMessage("bypassed successfully")
         }
@@ -1094,6 +1094,33 @@ function addMediaController() {
                 : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.59 5.59L18 7L12 13L7.41 18.41L6 17L12 11L18 17L16.59 18.41Z" fill="white"/></svg>';
         }
     });
+
+    // === Speed toggle button ===
+    const speedToggleButton = document.createElement("button");
+    speedToggleButton.id = "netflix-speed-toggle";
+    speedToggleButton.title = "Speed: 1x";
+    speedToggleButton.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" role="img" viewBox="0 0 24 24" width="24" height="24" data-icon="InternetSpeedStandard" aria-hidden="true">
+<path fill="currentColor" d="M19.0569 6.27006C15.1546 2.20629 8.84535 2.20629 4.94312 6.27006C1.01896 10.3567 1.01896 16.9985 4.94312 21.0852L3.50053 22.4704C-1.16684 17.6098 -1.16684 9.7454 3.50053 4.88481C8.18984 0.0013696 15.8102 0.0013696 20.4995 4.88481C25.1668 9.7454 25.1668 17.6098 20.4995 22.4704L19.0569 21.0852C22.981 16.9985 22.981 10.3567 19.0569 6.27006ZM15 14.0001C15 15.6569 13.6569 17.0001 12 17.0001C10.3431 17.0001 9 15.6569 9 14.0001C9 12.3432 10.3431 11.0001 12 11.0001C12.4632 11.0001 12.9018 11.105 13.2934 11.2924L16.2929 8.29296L17.7071 9.70717L14.7076 12.7067C14.895 13.0983 15 13.5369 15 14.0001Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+</svg>
+`;
+
+    let speedOptions = [1, 1.25, 1.5, 1.75, 2];
+    let currentSpeedIndex = 0;
+
+    speedToggleButton.addEventListener("click", () => {
+        currentSpeedIndex = (currentSpeedIndex + 1) % speedOptions.length;
+        if (state.videoElement) {
+            state.videoElement.playbackRate = speedOptions[currentSpeedIndex];
+            speedToggleButton.title = `Speed: ${speedOptions[currentSpeedIndex]}x`;
+            showMessage(`Speed: ${speedOptions[currentSpeedIndex]}x`);
+        }
+    });
+
+    // Append to right controls bar
+    controlsRight.appendChild(speedToggleButton);
+
+    // === End of Video Speed Control Integration ===
 
     state.videoElement.addEventListener("play", () => {
         if (state.buttonPlayPause)
@@ -1204,6 +1231,8 @@ function addMediaController() {
     controlsRight.appendChild(removeToggle);
     controlsRight.appendChild(subtitleToggle);
     controlsRight.appendChild(state.buttonFullScreen);
+    controlsRight.appendChild(speedToggleButton);
+
 
     state.controllerElement.appendChild(controlsLeft);
     state.controllerElement.appendChild(progressContainer);
@@ -1373,7 +1402,7 @@ function createBackButton() {
     state.backButton.style.alignItems = "center";
     state.backButton.style.justifyContent = "center";
     state.backButton.style.transition = "all 0.2s ease, opacity 0.3s ease";
-    state.backButton.style.opacity="0"
+    state.backButton.style.opacity = "0"
 
     // Add hover effect
     state.backButton.addEventListener("mouseover", () => {
