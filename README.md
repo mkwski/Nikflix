@@ -8,17 +8,17 @@ An extension that allows bypassing Netflix's password-sharing restrictions.
 If you like this project, consider giving it a star ⭐
 
 
-## 📥 Installation on Chrome, Edge, Brave , or any other Chromium-based browser (![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/knjoabokknkpkhbbdclmnjcoeedmgema))
+## 📥 Installation on Chrome, Edge, Brave , or any other Chromium-based browser
 
 [![Download on Chrome](https://img.shields.io/badge/Download-Chrome-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/nikflix/knjoabokknkpkhbbdclmnjcoeedmgema?hl=en-GB&authuser=0)
-![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/knjoabokknkpkhbbdclmnjcoeedmgema)
-![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/knjoabokknkpkhbbdclmnjcoeedmgema)
+[![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/knjoabokknkpkhbbdclmnjcoeedmgema)](https://chromewebstore.google.com/detail/nikflix/knjoabokknkpkhbbdclmnjcoeedmgema?hl=en-GB&authuser=0)
+[![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/knjoabokknkpkhbbdclmnjcoeedmgema)](https://chromewebstore.google.com/detail/nikflix/knjoabokknkpkhbbdclmnjcoeedmgema?hl=en-GB&authuser=0)
 
-## 📥 Installation on Firefox Browser(![Mozilla Add-on Version](https://img.shields.io/amo/v/nikflix))
+## 📥 Installation on Firefox Browser
 
 [![Download on Firefox](https://img.shields.io/badge/Download-Firefox-orange?logo=firefox)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
-![Mozilla Add-on Stars](https://img.shields.io/amo/stars/nikflix)
-![Mozilla Add-on Users](https://img.shields.io/amo/users/nikflix)
+[![Mozilla Add-on Stars](https://img.shields.io/amo/stars/nikflix)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
+[![Mozilla Add-on Users](https://img.shields.io/amo/users/nikflix)](https://addons.mozilla.org/fr/firefox/addon/nikflix/)
 
 ----
 
@@ -35,10 +35,6 @@ Thanks to [@vinodhelambe](https://github.com/vinodhelambe)
 - 🔘 New Button: netflix-speed-toggle added to the right control section.
 - 🔁 Speed Cycle: Cycles through playback speeds:
   1x → 1.25x → 1.5x → 1.75x → 2x → 1x ...
-
-### Fixed
-- Fixed the issue where the back button remained visible when the controller disappeared.
-
 
 ## 👥 Contributors
 <a href="https://github.com/YidirK/Nikflix/graphs/contributors">
