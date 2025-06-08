@@ -4,7 +4,7 @@ document.getElementById('code-btn').addEventListener('click', () => {
 });
 
 document.getElementById('coffee-btn').addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://buymeacoffee.com/yidirk' });
+    chrome.tabs.create({ url: 'https://ko-fi.com/yidirk' });
 });
 
 document.getElementById('bug-btn').addEventListener('click', () => {

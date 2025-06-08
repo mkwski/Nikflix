@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/3000-users.png" alt="3000 users" width="600"/>
+  <img src="assets/4000-users.png" alt="3000 users" width="600"/>
 </p>
 
 # Netflix Password-Sharing (household) Bypass Extension
@@ -29,12 +29,11 @@ If you like this project, consider giving it a star ⭐
 -  Get Around the Netflix Password-Sharing Ban (Netflix household).
 
 # 📝 Changelog
-## [1.8.0] - 2025-06-01
-Thanks to [@vinodhelambe](https://github.com/vinodhelambe)
-### Added
-- 🔘 New Button: netflix-speed-toggle added to the right control section.
-- 🔁 Speed Cycle: Cycles through playback speeds:
-  1x → 1.25x → 1.5x → 1.75x → 2x → 1x ...
+## [1.8.1] - 2025-06-09
+
+### Fixes
+ - 🔘 Fixed the fullscreen mode icon display.
+ - 🐞 Removed a function that was causing bugs.
 
 ## 👥 Contributors
 <a href="https://github.com/YidirK/Nikflix/graphs/contributors">
