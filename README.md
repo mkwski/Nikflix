@@ -29,11 +29,10 @@ If you like this project, consider giving it a star ⭐
 -  Get Around the Netflix Password-Sharing Ban (Netflix household).
 
 # 📝 Changelog
-## [1.8.1] - 2025-06-09
+## [1.8.2] - 2025-06-11
 
 ### Fixes
- - 🔘 Fixed the fullscreen mode icon display.
- - 🐞 Removed a function that was causing bugs.
+ - 🔘 Removal of the unnecessary permission.
 
 ## 👥 Contributors
 <a href="https://github.com/YidirK/Nikflix/graphs/contributors">
