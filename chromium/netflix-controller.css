@@ -4,21 +4,23 @@
     left: 0;
     width: 100%;
     background: linear-gradient(to top,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 0.9) 10%,
-    rgba(0, 0, 0, 0.8) 20%,
-    rgba(0, 0, 0, 0.7) 30%,
-    rgba(0, 0, 0, 0.6) 40%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.2) 65%,
-    rgba(0, 0, 0, 0.1) 80%,
-    rgba(0, 0, 0, 0) 100%);
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 0.9) 10%,
+            rgba(0, 0, 0, 0.8) 20%,
+            rgba(0, 0, 0, 0.7) 30%,
+            rgba(0, 0, 0, 0.6) 40%,
+            rgba(0, 0, 0, 0.4) 50%,
+            rgba(0, 0, 0, 0.2) 65%,
+            rgba(0, 0, 0, 0.1) 80%,
+            rgba(0, 0, 0, 0) 100%);
     color: white;
     padding: 18px 20px;
-    padding-top: 60px; /* Extended padding for better gradient effect */
+    padding-top: 60px;
+    /* Extended padding for better gradient effect */
     z-index: 9999;
     display: flex;
-    align-items: center; /* Changed from flex-end to center for better alignment */
+    align-items: center;
+    /* Changed from flex-end to center for better alignment */
     justify-content: space-between;
     font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     transform: translateZ(0);
@@ -36,7 +38,8 @@
     height: 100%;
     z-index: 9998;
     background-color: transparent;
-    pointer-events: none; /* Allow clicks to pass through to Netflix controls */
+    pointer-events: none;
+    /* Allow clicks to pass through to Netflix controls */
 }
 
 #netflix-video-area-overlay {
@@ -44,7 +47,8 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - 140px); /* Exclude Netflix controls area */
+    height: calc(100% - 140px);
+    /* Exclude Netflix controls area */
     z-index: 9997;
     cursor: pointer;
     background-color: transparent;
@@ -139,7 +143,8 @@
     margin: 0 20px;
     position: relative;
     transition: height 0.2s ease;
-    align-self: center; /* Center vertically within flex container */
+    align-self: center;
+    /* Center vertically within flex container */
 }
 
 #netflix-barre-container:hover {
@@ -255,10 +260,12 @@
     height: 5px;
 }
 
-.controls-left, .controls-right {
+.controls-left,
+.controls-right {
     display: flex;
     align-items: center;
-    height: 40px; /* Fixed height to ensure consistent alignment */
+    height: 40px;
+    /* Fixed height to ensure consistent alignment */
 }
 
 .controls-center {
@@ -483,55 +490,72 @@
     border-radius: 50%;
 }
 
-input:checked + .subtitle-toggle-slider {
+input:checked+.subtitle-toggle-slider {
     background-color: #E50914;
 }
 
-input:focus + .subtitle-toggle-slider {
+input:focus+.subtitle-toggle-slider {
     box-shadow: 0 0 1px #E50914;
 }
 
-input:checked + .subtitle-toggle-slider:before {
+input:checked+.subtitle-toggle-slider:before {
     transform: translateX(20px);
 }
 
 /* Custom dual subtitles styling */
 .player-timedtext[dual-subtitles='true'] {
-    position: fixed !important; /* Use fixed instead of absolute to ensure consistent positioning */
-    bottom: 80px !important;  /* Position above the controller */
-    top: auto !important; /* Override any top positioning from Netflix */
+    position: fixed !important;
+    /* Use fixed instead of absolute to ensure consistent positioning */
+    bottom: 80px !important;
+    /* Position above the controller */
+    top: auto !important;
+    /* Override any top positioning from Netflix */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
     display: flex !important;
     justify-content: center !important;
-    align-items: flex-end !important; /* Align to bottom */
+    align-items: flex-end !important;
+    /* Align to bottom */
     pointer-events: none !important;
-    z-index: 9996 !important; /* Make sure it's above video but below controls */
-    transform: none !important; /* Reset any transforms */
+    z-index: 9996 !important;
+    /* Make sure it's above video but below controls */
+    transform: none !important;
+    /* Reset any transforms */
 }
 
 .player-timedtext[dual-subtitles='true'] .player-timedtext-text-container {
-    max-width: 80% !important; /* Limit width to prevent overflow */
+    max-width: 80% !important;
+    /* Limit width to prevent overflow */
     margin: 0 auto !important;
     background-color: rgba(0, 0, 0, var(--subtitle-bg-opacity, 0.5));
     padding: 8px 16px;
     border-radius: 4px;
     text-align: center !important;
-    position: relative !important; /* Reset any absolute positioning */
-    left: 0 !important; /* Reset any left positioning */
-    right: 0 !important; /* Reset any right positioning */
-    transform: none !important; /* Reset any transforms */
-    width: auto !important; /* Let the width be determined by content with max-width limit */
+    position: relative !important;
+    /* Reset any absolute positioning */
+    left: 0 !important;
+    /* Reset any left positioning */
+    right: 0 !important;
+    /* Reset any right positioning */
+    transform: none !important;
+    /* Reset any transforms */
+    width: auto !important;
+    /* Let the width be determined by content with max-width limit */
 }
 
 /* Fix subtitle text to prevent overflow and ensure proper wrapping */
 .player-timedtext[dual-subtitles='true'] .player-timedtext-text-container span {
-    white-space: normal !important; /* Allow text to wrap */
-    overflow-wrap: break-word !important; /* Break long words if needed */
-    word-break: break-word !important; /* Break words at appropriate points */
-    display: inline-block !important; /* Keep the text behavior consistent */
-    max-width: 100% !important; /* Prevent overflow */
+    white-space: normal !important;
+    /* Allow text to wrap */
+    overflow-wrap: break-word !important;
+    /* Break long words if needed */
+    word-break: break-word !important;
+    /* Break words at appropriate points */
+    display: inline-block !important;
+    /* Keep the text behavior consistent */
+    max-width: 100% !important;
+    /* Prevent overflow */
 }
 
 .primary-subtitle {
@@ -574,11 +598,25 @@ input:checked + .subtitle-toggle-slider:before {
     border-color: white;
 }
 
-.color-white { background-color: white; }
-.color-yellow { background-color: #FFD700; }
-.color-cyan { background-color: #00FFFF; }
-.color-green { background-color: #7FFF00; }
-.color-pink { background-color: #FF69B4; }
+.color-white {
+    background-color: white;
+}
+
+.color-yellow {
+    background-color: #FFD700;
+}
+
+.color-cyan {
+    background-color: #00FFFF;
+}
+
+.color-green {
+    background-color: #7FFF00;
+}
+
+.color-pink {
+    background-color: #FF69B4;
+}
 
 /* Size options */
 .size-option {
@@ -709,4 +747,8 @@ input:checked + .subtitle-toggle-slider:before {
 
 #netflix-speed-toggle:active {
     transform: scale(0.95);
+}
+
+#nikflix-secondary-box {
+    margin-bottom: 6px;
 }

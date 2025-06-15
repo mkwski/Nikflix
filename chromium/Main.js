@@ -185,7 +185,7 @@ async function showEpisodesList() {
                 <div class="season-container">
                     <div class="season-header">Season ${season.seq}</div>
                     ${season.episodes.map(episode => `
-                        <div class="episode-item ${episode.id.toString() === curEpisodeId ? 'current' : ''}" 
+                        <div class="episode-item ${episode.id.toString() === curEpisodeId ? 'current' : ''}"
                              data-episode-id="${episode.id}">
                             <span class="episode-number">E${episode.seq}</span>
                             <span class="episode-title">${episode.title}</span>
@@ -395,6 +395,56 @@ function cleanController() {
     };
 }
 
+function enableDualSubtitles() {
+    // ❶ make sure a container exists
+    let box = document.getElementById('nikflix-secondary-box');
+    if (!box) {
+        const timed = document.querySelector('.player-timedtext');
+        if (!timed) return;                       // Netflix not ready
+        box = document.createElement('div');
+        box.id = 'nikflix-secondary-box';
+        box.className = 'secondary-subtitle';
+        timed.setAttribute('dual-subtitles', 'true');
+        timed.prepend(box);                       // put it *above* Netflix’s line
+    }
+
+    // ❷ if disabled or no secondary track, hide & return
+    if (!state.bilingualEnabled || state.secondarySubtitleTrack == null) {
+        box.textContent = '';
+        return;
+    }
+
+    // ❸ lazily attach a <track> element so we get TextTrackCue events
+    if (!state.secondaryTextTrack) {
+        const trackInfo = state.availableSubtitleTracks[state.secondarySubtitleTrack];
+        if (!trackInfo || !trackInfo.downloadUrls) return;
+
+        const vttUrl = trackInfo.downloadUrls['webvtt-lssdh-ios8'][0].url;
+        const tr = document.createElement('track');
+        tr.kind = 'subtitles';
+        tr.srclang = trackInfo.language;
+        tr.label = 'Nikflix-extra';
+        tr.src = vttUrl;
+        tr.default = false;
+        tr.mode = 'hidden';
+        state.videoElement.appendChild(tr);
+        state.secondaryTextTrack = tr.track;
+
+        // whenever the active cue changes, display it
+        state.secondaryTextTrack.oncuechange = () => {
+            const cue = state.secondaryTextTrack.activeCues[0];
+            box.innerHTML = cue ? cue.text : '';
+        };
+    }
+}
+
+// react whenever the user toggles the switch, picks a language, or Netflix seeks
+video.addEventListener('nikflix-apply-dual', enableDualSubtitles);
+video.addEventListener('timeupdate', () => {
+    if (state.bilingualEnabled) enableDualSubtitles();
+});
+
+
 /**
  * Show the controller and set a timer to hide it
  */
@@ -472,20 +522,20 @@ function createSubtitleSettings() {
     // Create settings content
     panel.innerHTML = `
         <h3>Language Settings</h3>
-        
+
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Subtitles</span>
             <div class="subtitle-settings-control">
                 <label class="subtitle-toggle-switch">
                     <input type="checkbox" id="subtitle-toggle-checkbox" ${state.subtitleEnabled ? "checked" : ""
-    }>
+        }>
                     <span class="subtitle-toggle-slider"></span>
                 </label>
             </div>
         </div>
-        
-     
-        
+
+
+
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Audio Language</span>
             <div class="subtitle-settings-control">
@@ -494,7 +544,7 @@ function createSubtitleSettings() {
                 </select>
             </div>
         </div>
-        
+
         <div class="subtitle-settings-row">
             <span class="subtitle-settings-label">Subtitles Language</span>
             <div class="subtitle-settings-control">
@@ -503,6 +553,18 @@ function createSubtitleSettings() {
                 </select>
             </div>
         </div>
+
+        <div class="subtitle-settings-row">
+        <span class="subtitle-settings-label">Extra subtitle</span>
+        <div class="subtitle-settings-control">
+                <label class="subtitle-toggle-switch">
+                    <input id="nikflix-dual-toggle" type="checkbox">
+                    <span class="subtitle-toggle-slider"></span>
+                </label>
+                <select id="nikflix-dual-lang" class="subtitle-select" style="margin-left:8px"></select>
+        </div>
+        </div>
+
     `;
 
     document.body.appendChild(panel);
@@ -542,6 +604,27 @@ function createSubtitleSettings() {
                 showMessage(`Subtitle changed to ${state.availableSubtitleTracks[e.target.value].displayName} `, 2000);
             }, 500);
         });
+
+    // fill the select with every text-track Netflix exposes
+    state.availableSubtitleTracks.forEach((t, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${t.language} – ${t.displayName}`;
+        dualSelect.appendChild(opt);
+    });
+
+    // toggle dual-subs
+    dualToggle.addEventListener('change', e => {
+        state.bilingualEnabled = e.target.checked;
+        video.dispatchEvent(new Event('nikflix-apply-dual'));
+    });
+
+    // pick a language
+    dualSelect.addEventListener('change', e => {
+        state.secondarySubtitleTrack = Number(e.target.value);
+        video.dispatchEvent(new Event('nikflix-apply-dual'));
+    });
+
     return panel;
 }
 
@@ -1090,7 +1173,7 @@ function addMediaController() {
         if (state.buttonFullScreen) {
             state.buttonFullScreen.innerHTML = document.fullscreenElement
                 ? '<svg width="24" height="24"  viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"  fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="ic_fluent_full_screen_zoom_24_filled" fill="#ffffff" fill-rule="nonzero"> <path d="M20,15 C20.5522847,15 21,15.4477153 21,16 C21,16.5522847 20.5522847,17 20,17 L17,17 L17,20 C17,20.5522847 16.5522847,21 16,21 C15.4477153,21 15,20.5522847 15,20 L15,16 C15,15.4477153 15.4477153,15 16,15 L20,15 Z M4,15 L8,15 C8.51283584,15 8.93550716,15.3860402 8.99327227,15.8833789 L9,16 L9,20 C9,20.5522847 8.55228475,21 8,21 C7.48716416,21 7.06449284,20.6139598 7.00672773,20.1166211 L7,20 L7,17 L4,17 C3.44771525,17 3,16.5522847 3,16 C3,15.4871642 3.38604019,15.0644928 3.88337887,15.0067277 L4,15 L8,15 L4,15 Z M16,3 C16.5128358,3 16.9355072,3.38604019 16.9932723,3.88337887 L17,4 L17,7 L20,7 C20.5522847,7 21,7.44771525 21,8 C21,8.51283584 20.6139598,8.93550716 20.1166211,8.99327227 L20,9 L16,9 C15.4871642,9 15.0644928,8.61395981 15.0067277,8.11662113 L15,8 L15,4 C15,3.44771525 15.4477153,3 16,3 Z M8,3 C8.55228475,3 9,3.44771525 9,4 L9,8 C9,8.55228475 8.55228475,9 8,9 L4,9 C3.44771525,9 3,8.55228475 3,8 C3,7.44771525 3.44771525,7 4,7 L7,7 L7,4 C7,3.44771525 7.44771525,3 8,3 Z" id="🎨-Color"> </path> </g> </g> </g></svg>'
-                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M9.94358 1.25L10 1.25C10.4142 1.25 10.75 1.58579 10.75 2C10.75 2.41421 10.4142 2.75 10 2.75C8.09318 2.75 6.73851 2.75159 5.71085 2.88976C4.70476 3.02502 4.12511 3.27869 3.7019 3.7019C3.27869 4.12511 3.02502 4.70476 2.88976 5.71085C2.75159 6.73851 2.75 8.09318 2.75 10C2.75 10.4142 2.41421 10.75 2 10.75C1.58579 10.75 1.25 10.4142 1.25 10L1.25 9.94358C1.24998 8.10582 1.24997 6.65019 1.40314 5.51098C1.56076 4.33856 1.89288 3.38961 2.64124 2.64124C3.38961 1.89288 4.33856 1.56076 5.51098 1.40314C6.65019 1.24997 8.10582 1.24998 9.94358 1.25ZM18.2892 2.88976C17.2615 2.75159 15.9068 2.75 14 2.75C13.5858 2.75 13.25 2.41421 13.25 2C13.25 1.58579 13.5858 1.25 14 1.25L14.0564 1.25C15.8942 1.24998 17.3498 1.24997 18.489 1.40314C19.6614 1.56076 20.6104 1.89288 21.3588 2.64124C22.1071 3.38961 22.4392 4.33856 22.5969 5.51098C22.75 6.65019 22.75 8.10583 22.75 9.94359V10C22.75 10.4142 22.4142 10.75 22 10.75C21.5858 10.75 21.25 10.4142 21.25 10C21.25 8.09318 21.2484 6.73851 21.1102 5.71085C20.975 4.70476 20.7213 4.12511 20.2981 3.7019C19.8749 3.27869 19.2952 3.02502 18.2892 2.88976ZM2 13.25C2.41421 13.25 2.75 13.5858 2.75 14C2.75 15.9068 2.75159 17.2615 2.88976 18.2892C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25C10.4142 21.25 10.75 21.5858 10.75 22C10.75 22.4142 10.4142 22.75 10 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3588C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564L1.25 14C1.25 13.5858 1.58579 13.25 2 13.25ZM22 13.25C22.4142 13.25 22.75 13.5858 22.75 14V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3588C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H14C13.5858 22.75 13.25 22.4142 13.25 22C13.25 21.5858 13.5858 21.25 14 21.25C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2892C21.2484 17.2615 21.25 15.9068 21.25 14C21.25 13.5858 21.5858 13.25 22 13.25Z" fill="#ffffff"></path> </g></svg>' ;
+                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M9.94358 1.25L10 1.25C10.4142 1.25 10.75 1.58579 10.75 2C10.75 2.41421 10.4142 2.75 10 2.75C8.09318 2.75 6.73851 2.75159 5.71085 2.88976C4.70476 3.02502 4.12511 3.27869 3.7019 3.7019C3.27869 4.12511 3.02502 4.70476 2.88976 5.71085C2.75159 6.73851 2.75 8.09318 2.75 10C2.75 10.4142 2.41421 10.75 2 10.75C1.58579 10.75 1.25 10.4142 1.25 10L1.25 9.94358C1.24998 8.10582 1.24997 6.65019 1.40314 5.51098C1.56076 4.33856 1.89288 3.38961 2.64124 2.64124C3.38961 1.89288 4.33856 1.56076 5.51098 1.40314C6.65019 1.24997 8.10582 1.24998 9.94358 1.25ZM18.2892 2.88976C17.2615 2.75159 15.9068 2.75 14 2.75C13.5858 2.75 13.25 2.41421 13.25 2C13.25 1.58579 13.5858 1.25 14 1.25L14.0564 1.25C15.8942 1.24998 17.3498 1.24997 18.489 1.40314C19.6614 1.56076 20.6104 1.89288 21.3588 2.64124C22.1071 3.38961 22.4392 4.33856 22.5969 5.51098C22.75 6.65019 22.75 8.10583 22.75 9.94359V10C22.75 10.4142 22.4142 10.75 22 10.75C21.5858 10.75 21.25 10.4142 21.25 10C21.25 8.09318 21.2484 6.73851 21.1102 5.71085C20.975 4.70476 20.7213 4.12511 20.2981 3.7019C19.8749 3.27869 19.2952 3.02502 18.2892 2.88976ZM2 13.25C2.41421 13.25 2.75 13.5858 2.75 14C2.75 15.9068 2.75159 17.2615 2.88976 18.2892C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25C10.4142 21.25 10.75 21.5858 10.75 22C10.75 22.4142 10.4142 22.75 10 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3588C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564L1.25 14C1.25 13.5858 1.58579 13.25 2 13.25ZM22 13.25C22.4142 13.25 22.75 13.5858 22.75 14V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3588C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H14C13.5858 22.75 13.25 22.4142 13.25 22C13.25 21.5858 13.5858 21.25 14 21.25C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2892C21.2484 17.2615 21.25 15.9068 21.25 14C21.25 13.5858 21.5858 13.25 22 13.25Z" fill="#ffffff"></path> </g></svg>';
         }
     });
 
